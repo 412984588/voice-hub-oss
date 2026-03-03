@@ -19,6 +19,7 @@ function createConfig(): Config {
     webhookPort: 8911,
     webhookSecret: 'test-webhook-secret',
     webhookPath: '/webhook/callback',
+    voiceHubApiKey: undefined,
     webhookLegacySecretHeader: false,
     webhookShadowMode: false,
     corsAllowedOrigins: ['http://localhost:3000', 'http://127.0.0.1:3000'],
@@ -46,6 +47,7 @@ function createRuntimeMock() {
     destroySession: vi.fn(),
     getSession: vi.fn(),
     getAllSessions: vi.fn().mockReturnValue([]),
+    getSessionState: vi.fn().mockReturnValue('idle'),
     startListening: vi.fn(),
     stopListening: vi.fn(),
     sendAudio: vi.fn(),
@@ -169,6 +171,80 @@ describe('VoiceHubServer route implementations', () => {
     runtime.isActive.mockReturnValue(false);
     const notReady = await fastify.inject({ method: 'GET', url: '/ready' });
     expect(notReady.statusCode).toBe(503);
+  });
+
+  it('rejects unauthenticated api requests when voiceHubApiKey is configured', async () => {
+    const config = createConfig();
+    config.voiceHubApiKey = 'secret-key';
+    const runtime = createRuntimeMock();
+    const server = new VoiceHubServer(config, runtime as unknown as VoiceRuntime);
+    const fastify = (server as any).server;
+
+    const response = await fastify.inject({
+      method: 'GET',
+      url: '/api/status',
+    });
+
+    expect(response.statusCode).toBe(401);
+  });
+
+  it('accepts api key in Authorization header', async () => {
+    const config = createConfig();
+    config.voiceHubApiKey = 'secret-key';
+    const runtime = createRuntimeMock();
+    const server = new VoiceHubServer(config, runtime as unknown as VoiceRuntime);
+    const fastify = (server as any).server;
+
+    const response = await fastify.inject({
+      method: 'GET',
+      url: '/api/status',
+      headers: {
+        authorization: 'Bearer secret-key',
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+  });
+
+  it('returns session status by /api/sessions/:sessionId/status', async () => {
+    const runtime = createRuntimeMock();
+    runtime.getSession.mockReturnValue({ sessionId: 's1' });
+    runtime.getSessionState.mockReturnValue('listening');
+    const server = new VoiceHubServer(createConfig(), runtime as unknown as VoiceRuntime);
+    const fastify = (server as any).server;
+
+    const response = await fastify.inject({
+      method: 'GET',
+      url: '/api/sessions/s1/status',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      state: 'listening',
+      isActive: true,
+    });
+  });
+
+  it('accepts raw audio by /api/sessions/:sessionId/audio', async () => {
+    const runtime = createRuntimeMock();
+    runtime.getSession.mockReturnValue({ sessionId: 's1' });
+    const server = new VoiceHubServer(createConfig(), runtime as unknown as VoiceRuntime);
+    const fastify = (server as any).server;
+
+    const response = await fastify.inject({
+      method: 'POST',
+      url: '/api/sessions/s1/audio',
+      payload: {
+        audioBase64: Buffer.from(Uint8Array.from([1, 0, 2, 0])).toString('base64'),
+        sampleRate: 16000,
+        channels: 1,
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(runtime.sendAudio).toHaveBeenCalledTimes(1);
+    const frame = runtime.sendAudio.mock.calls[0]?.[1];
+    expect(frame.data).toEqual(new Int16Array([1, 2]));
   });
 
   it('enforces cors allowlist from config', async () => {

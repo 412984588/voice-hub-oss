@@ -79,26 +79,50 @@ export class VoiceHubApp {
     }
 
     this.logInfo('Starting Voice Hub...');
+    let runtimeStarted = false;
+    let discordStarted = false;
+    let serverStarted = false;
 
-    // 启动运行时
-    if (this.runtime) {
-      await this.runtime.start();
+    try {
+      // 启动运行时
+      if (this.runtime) {
+        await this.runtime.start();
+        runtimeStarted = true;
+      }
+
+      // 启动 Discord Bot
+      if (this.discordBot) {
+        await this.discordBot.start();
+        discordStarted = true;
+        this.logInfo('Discord bot connected');
+      }
+
+      // 启动 Web 服务器
+      if (this.server) {
+        await this.server.start();
+        serverStarted = true;
+        this.logInfo(`Web server listening on port ${this.config.webhookPort}`);
+      }
+
+      this.isRunning = true;
+      this.logInfo('Voice Hub is running');
+    } catch (error) {
+      // 启动失败时回滚已经启动的组件
+      if (serverStarted && this.server) {
+        await this.stopSafely(() => this.server!.stop(), 'web server');
+      }
+
+      if (discordStarted && this.discordBot) {
+        await this.stopSafely(() => this.discordBot!.stop(), 'discord bot');
+      }
+
+      if (runtimeStarted && this.runtime) {
+        await this.stopSafely(() => this.runtime!.stop(), 'runtime');
+      }
+
+      this.isRunning = false;
+      throw error;
     }
-
-    // 启动 Discord Bot
-    if (this.discordBot) {
-      await this.discordBot.start();
-      this.logInfo('Discord bot connected');
-    }
-
-    // 启动 Web 服务器
-    if (this.server) {
-      await this.server.start();
-      this.logInfo(`Web server listening on port ${this.config.webhookPort}`);
-    }
-
-    this.isRunning = true;
-    this.logInfo('Voice Hub is running');
   }
 
   /** 停止应用 */
@@ -146,5 +170,14 @@ export class VoiceHubApp {
 
   private logInfo(message: string): void {
     process.stdout.write(`[voice-hub-app] ${message}\n`);
+  }
+
+  private async stopSafely(stopFn: () => Promise<void>, component: string): Promise<void> {
+    try {
+      await stopFn();
+    } catch (error) {
+      const detail = error instanceof Error ? (error.stack ?? error.message) : String(error);
+      process.stderr.write(`[voice-hub-app] Failed to rollback ${component}: ${detail}\n`);
+    }
   }
 }

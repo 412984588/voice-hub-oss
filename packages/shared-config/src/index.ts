@@ -30,6 +30,7 @@ export interface Config {
   webhookPort: number;
   webhookSecret: string;
   webhookPath: string;
+  voiceHubApiKey?: string;
   webhookLegacySecretHeader: boolean;
   webhookShadowMode: boolean;
   corsAllowedOrigins: string[];

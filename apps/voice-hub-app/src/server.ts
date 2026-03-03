@@ -6,7 +6,7 @@
 
 import type { Config } from '@voice-hub/shared-config';
 import type { VoiceRuntime } from '@voice-hub/core-runtime';
-import type { AudioFrame, WebhookPayload } from '@voice-hub/shared-types';
+import { SessionState, type AudioFrame, type WebhookPayload } from '@voice-hub/shared-types';
 import {
   isWebhookTimestampFresh,
   verifyWebhookSignature,
@@ -44,6 +44,16 @@ export class VoiceHubServer {
     });
 
     this.server.register(websocket);
+    this.server.addHook('onRequest', async (request, reply) => {
+      const path = request.url.split('?')[0] ?? request.url;
+      if (!this.shouldProtectRoute(path)) {
+        return;
+      }
+
+      if (!this.isAuthorizedRequestHeaders(request.headers)) {
+        await reply.code(401).send({ error: 'Unauthorized' });
+      }
+    });
 
     this.setupRoutes();
     this.setupWebSocket();
@@ -99,6 +109,24 @@ export class VoiceHubServer {
       return { sessions };
     });
 
+    this.server.get('/api/sessions/:sessionId/status', async (request, reply) => {
+      const { sessionId } = request.params as { sessionId: string };
+      const session = this.runtime.getSession(sessionId);
+      if (!session) {
+        return reply.code(404).send({ error: 'Session not found' });
+      }
+
+      const state = this.runtime.getSessionState(sessionId);
+      if (!state) {
+        return reply.code(404).send({ error: 'Session not found' });
+      }
+
+      return {
+        state,
+        isActive: state !== SessionState.IDLE,
+      };
+    });
+
     // 语音控制
     this.server.post('/api/sessions/:sessionId/listening', async (request, reply) => {
       const { sessionId } = request.params as { sessionId: string };
@@ -110,6 +138,39 @@ export class VoiceHubServer {
       const { sessionId } = request.params as { sessionId: string };
       await this.runtime.stopListening(sessionId);
       return { success: true };
+    });
+
+    this.server.post('/api/sessions/:sessionId/audio', async (request, reply) => {
+      const { sessionId } = request.params as { sessionId: string };
+      const body = request.body as {
+        audioBase64?: string;
+        sampleRate?: number;
+        channels?: number;
+      };
+      const session = this.runtime.getSession(sessionId);
+      if (!session) {
+        return reply.code(404).send({ error: 'Session not found' });
+      }
+
+      if (typeof body.audioBase64 !== 'string') {
+        return reply.code(400).send({ error: 'audioBase64 is required' });
+      }
+
+      const pcm = this.decodeRawPcm16(body.audioBase64);
+      if (!pcm) {
+        return reply.code(400).send({ error: 'Invalid audioBase64 payload' });
+      }
+
+      const frame: AudioFrame = {
+        data: pcm,
+        sampleRate: this.normalizePositiveInteger(body.sampleRate, this.config.audioSampleRate),
+        channels: this.normalizePositiveInteger(body.channels, this.config.audioChannels),
+        timestamp: Date.now(),
+        sequence: Date.now() % Number.MAX_SAFE_INTEGER,
+      };
+
+      await this.runtime.sendAudio(sessionId, frame);
+      return { success: true, samples: frame.data.length };
     });
 
     // TTS（发送文本到语音）
@@ -195,6 +256,10 @@ export class VoiceHubServer {
     this.server.register(async function (fastify) {
       fastify.get('/ws', { websocket: true }, async (connection, req) => {
         const socket = connection.socket;
+        if (!self.isAuthorizedRequestHeaders(req.headers)) {
+          socket.close(1008, 'Unauthorized');
+          return;
+        }
 
         // 发送欢迎消息
         socket.send(JSON.stringify({
@@ -565,5 +630,60 @@ export class VoiceHubServer {
 
   private isWebhookShadowMode(): boolean {
     return this.config.webhookShadowMode;
+  }
+
+  private shouldProtectRoute(pathname: string): boolean {
+    return pathname === '/ws' || pathname.startsWith('/api/');
+  }
+
+  private isAuthorizedRequestHeaders(headers: Record<string, unknown>): boolean {
+    const requiredKey = this.config.voiceHubApiKey?.trim();
+    if (!requiredKey) {
+      return true;
+    }
+
+    const authorization = this.getSingleHeaderValue(headers.authorization as string | string[] | undefined);
+    if (authorization?.startsWith('Bearer ')) {
+      const bearerToken = authorization.slice('Bearer '.length).trim();
+      if (this.constantTimeEquals(requiredKey, bearerToken)) {
+        return true;
+      }
+    }
+
+    const apiKeyHeader = this.getSingleHeaderValue(headers['x-api-key'] as string | string[] | undefined);
+    if (apiKeyHeader && this.constantTimeEquals(requiredKey, apiKeyHeader.trim())) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private decodeRawPcm16(audioBase64: string): Int16Array | null {
+    const normalized = audioBase64.trim();
+    if (
+      normalized.length === 0 ||
+      normalized.length % 4 !== 0 ||
+      !/^[A-Za-z0-9+/]+={0,2}$/.test(normalized)
+    ) {
+      return null;
+    }
+
+    const buffer = Buffer.from(normalized, 'base64');
+    if (buffer.byteLength === 0 || buffer.byteLength % 2 !== 0) {
+      return null;
+    }
+
+    const pcm = new Int16Array(buffer.byteLength / 2);
+    for (let i = 0; i < pcm.length; i++) {
+      pcm[i] = buffer.readInt16LE(i * 2);
+    }
+    return pcm;
+  }
+
+  private normalizePositiveInteger(value: number | undefined, fallback: number): number {
+    if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+      return fallback;
+    }
+    return Math.floor(value);
   }
 }

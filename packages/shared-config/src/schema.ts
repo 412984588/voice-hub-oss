@@ -66,6 +66,7 @@ export const configSchema = z.object({
   WEBHOOK_PORT: z.coerce.number().int().positive().max(65535).default(8911),
   WEBHOOK_SECRET: z.string().min(16).default('change-me-in-production'),
   WEBHOOK_PATH: z.string().default('/webhook/callback'),
+  VOICE_HUB_API_KEY: z.string().trim().min(1).optional(),
   WEBHOOK_LEGACY_SECRET_HEADER: envBoolean(false),
   WEBHOOK_SHADOW_MODE: envBoolean(false),
   CORS_ALLOWED_ORIGINS: z.string().default(DEFAULT_CORS_ALLOWED_ORIGINS.join(',')),
@@ -116,6 +117,7 @@ export const internalConfigSchema = configSchema.transform((raw) => ({
   webhookPort: raw.WEBHOOK_PORT,
   webhookSecret: raw.WEBHOOK_SECRET,
   webhookPath: raw.WEBHOOK_PATH,
+  voiceHubApiKey: raw.VOICE_HUB_API_KEY,
   webhookLegacySecretHeader: raw.WEBHOOK_LEGACY_SECRET_HEADER,
   webhookShadowMode: raw.WEBHOOK_SHADOW_MODE,
   corsAllowedOrigins: raw.CORS_ALLOWED_ORIGINS

@@ -1,0 +1,125 @@
+{
+  "$schema": "https://openclaw.dev/schemas/plugin.json",
+  "id": "voice-hub",
+  "name": "Voice Hub",
+  "version": "0.1.0",
+  "description": "Real-time voice interaction middleware for OpenClaw - Discord voice + TTS/STT integration",
+  "author": "Voice Hub Team",
+  "license": "MIT",
+  "homepage": "https://github.com/voice-hub/voice-hub",
+  "repository": "https://github.com/voice-hub/voice-hub",
+
+  "type": "voice-hub",
+  "runtime": "node",
+
+  "entry": {
+    "main": "./src/index.js",
+    "types": "./src/index.d.ts"
+  },
+
+  "capabilities": {
+    "voice.input": {
+      "description": "Receive voice input from Discord voice channel",
+      "formats": ["pcm16", "opus"],
+      "sampleRates": [16000, 24000, 48000]
+    },
+    "voice.output": {
+      "description": "Send voice output to Discord voice channel",
+      "formats": ["pcm16", "opus"],
+      "sampleRates": [16000, 24000, 48000]
+    },
+    "session.manage": {
+      "description": "Create, manage, and destroy voice sessions"
+    },
+    "backend.dispatch": {
+      "description": "Dispatch events to backend via webhook"
+    }
+  },
+
+  "commands": [
+    {
+      "name": "create_session",
+      "description": "Create a new voice session",
+      "params": {
+        "userId": { "type": "string", "required": false, "description": "Optional user identifier" },
+        "channelId": { "type": "string", "required": false, "description": "Optional Discord voice channel ID" }
+      },
+      "returns": { "type": "string", "description": "Session ID" }
+    },
+    {
+      "name": "destroy_session",
+      "description": "Destroy an existing voice session",
+      "params": {
+        "sessionId": { "type": "string", "required": true, "description": "Session ID to destroy" }
+      }
+    },
+    {
+      "name": "start_listening",
+      "description": "Start listening for voice input",
+      "params": {
+        "sessionId": { "type": "string", "required": true, "description": "Session ID" }
+      }
+    },
+    {
+      "name": "stop_listening",
+      "description": "Stop listening for voice input",
+      "params": {
+        "sessionId": { "type": "string", "required": true, "description": "Session ID" }
+      }
+    },
+    {
+      "name": "send_audio",
+      "description": "Send audio data to the session",
+      "params": {
+        "sessionId": { "type": "string", "required": true, "description": "Session ID" },
+        "audioData": { "type": "ArrayBuffer", "required": true, "description": "Audio data in base64 or binary" }
+      }
+    },
+    {
+      "name": "get_status",
+      "description": "Get current session status",
+      "params": {
+        "sessionId": { "type": "string", "required": true, "description": "Session ID" }
+    },
+      "returns": {
+        "type": "object",
+        "properties": {
+          "state": { "type": "string", "description": "Current session state" },
+          "isActive": { "type": "boolean", "description": "Whether the session is active" }
+        }
+      }
+    }
+  ],
+
+  "events": {
+    "emitted": [
+      { "name": "session.created", "description": "Fired when a new session is created" },
+      { "name": "session.destroyed", "description": "Fired when a session is destroyed" },
+      { "name": "listening.started", "description": "Fired when listening starts" },
+      { "name": "listening.stopped", "description": "Fired when listening stops" },
+      { "name": "audio.received", "description": "Fired when audio data is received" },
+      { "name": "error", "description": "Fired when an error occurs" }
+    ]
+  },
+
+  "dependencies": {
+    "openclaw": ">=0.1.0",
+    "node": ">=22.12.0"
+  },
+
+  "configuration": {
+    "env": [
+      { "name": "VOICE_PROVIDER", "description": "Voice provider: disabled, local-mock, doubao", "default": "local-mock" },
+      { "name": "DISCORD_BOT_TOKEN", "description": "Discord bot token", "required": true },
+      { "name": "DISCORD_GUILD_ID", "description": "Discord guild ID", "required": true },
+      { "name": "WEBHOOK_PORT", "description": "Webhook server port", "default": "8848" },
+      { "name": "WEBHOOK_SECRET", "description": "Webhook signature secret", "required": true }
+    ],
+    "configFiles": [".env"]
+  },
+
+  "installation": {
+    "type": "npm",
+    "package": "@voice-hub/openclaw-plugin"
+  }
+}

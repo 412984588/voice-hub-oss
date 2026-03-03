@@ -18,17 +18,33 @@ function logError(message: string, error: unknown): void {
 
 async function main(): Promise<void> {
   const app = new VoiceHubApp();
+  let isShuttingDown = false;
 
   // 优雅关闭处理
-  const shutdown = async (signal: string) => {
+  const shutdown = async (signal: string): Promise<void> => {
+    if (isShuttingDown) {
+      return;
+    }
+    isShuttingDown = true;
     logInfo(`\nReceived ${signal}, shutting down gracefully...`);
-    await app.stop();
-    process.exit(0);
+    try {
+      await app.stop();
+      process.exit(0);
+    } catch (error) {
+      logError('Failed to stop Voice Hub', error);
+      process.exit(1);
+    }
   };
 
-  process.on('SIGINT', () => shutdown('SIGINT'));
-  process.on('SIGTERM', () => shutdown('SIGTERM'));
-  process.on('SIGUSR2', () => shutdown('SIGUSR2')); // nodemon
+  process.on('SIGINT', () => {
+    void shutdown('SIGINT');
+  });
+  process.on('SIGTERM', () => {
+    void shutdown('SIGTERM');
+  });
+  process.on('SIGUSR2', () => {
+    void shutdown('SIGUSR2');
+  }); // nodemon
 
   // 启动应用
   try {
@@ -39,10 +55,11 @@ async function main(): Promise<void> {
   }
 
   // 定期输出状态
-  setInterval(() => {
+  const statusTimer = setInterval(() => {
     const status = app.getStatus();
     logInfo(JSON.stringify(status));
   }, 60000);
+  statusTimer.unref();
 }
 
 main().catch((error) => {

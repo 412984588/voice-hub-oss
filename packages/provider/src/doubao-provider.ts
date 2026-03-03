@@ -63,12 +63,12 @@ export class DoubaoProvider extends BaseProvider {
     try {
       const url = new URL(this._config.url);
       url.searchParams.set('app_id', (this._config as DoubaoConfig).appId);
-      url.searchParams.set('authorization', (this._config as DoubaoConfig).accessToken);
       url.searchParams.set('session_id', this._config.sessionId);
 
       this.ws = new WebSocket(url.toString(), {
         headers: {
           'User-Agent': 'voice-hub/0.1.0',
+          'Authorization': `Bearer ${(this._config as DoubaoConfig).accessToken}`,
         },
       });
 
@@ -249,9 +249,14 @@ export class DoubaoProvider extends BaseProvider {
 
     // 解码 base64 音频
     const audioBuffer = Buffer.from(data.audio, 'base64');
+    const sampleCount = Math.floor(audioBuffer.byteLength / 2);
+    const pcm = new Int16Array(sampleCount);
+    for (let i = 0; i < sampleCount; i++) {
+      pcm[i] = audioBuffer.readInt16LE(i * 2);
+    }
 
     const frame: AudioFrame = {
-      data: new Int16Array(audioBuffer.buffer),
+      data: pcm,
       sampleRate: data.sampleRate || 16000,
       channels: data.channels || 1,
       timestamp: Date.now(),
@@ -296,7 +301,7 @@ export class DoubaoProvider extends BaseProvider {
 
   private prepareAudioData(frame: AudioFrame): Buffer {
     // 将 Int16Array 转换为 Buffer
-    return Buffer.from(frame.data.buffer);
+    return Buffer.from(frame.data.buffer, frame.data.byteOffset, frame.data.byteLength);
   }
 
   private startHeartbeat(): void {

@@ -60,7 +60,7 @@ export abstract class BaseProvider extends EventEmitter implements IAudioProvide
   }
 
   on(event: 'audio', listener: PushAudioCallback): this;
-  on(event: 'connected' | 'disconnected' | 'ready' | 'error', listener: EventListener): this;
+  on(event: 'provider' | 'connected' | 'disconnected' | 'ready' | 'error', listener: EventListener): this;
   on(event: string, listener: EventListener | PushAudioCallback): this {
     if (event === 'audio') {
       this._audioCallbacks.add(listener as PushAudioCallback);
@@ -110,14 +110,24 @@ export abstract class BaseProvider extends EventEmitter implements IAudioProvide
   }
 
   protected emitEvent(event: ProviderEvent): void {
-    const listeners = this._eventListeners.get(event.type);
-    if (listeners) {
-      for (const listener of listeners) {
-        try {
-          listener(event);
-        } catch (error) {
-          this.logCallbackError('Event listener error', error);
-        }
+    this.notifyEventListeners(event.type, event);
+
+    if (event.type === 'provider') {
+      this.notifyEventListeners(event.subType, event);
+    }
+  }
+
+  private notifyEventListeners(eventName: string, event: ProviderEvent): void {
+    const listeners = this._eventListeners.get(eventName);
+    if (!listeners) {
+      return;
+    }
+
+    for (const listener of listeners) {
+      try {
+        listener(event);
+      } catch (error) {
+        this.logCallbackError('Event listener error', error);
       }
     }
   }
