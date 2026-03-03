@@ -79,3 +79,81 @@ describe('Webhook signature helpers', () => {
     expect(verifyWebhookSignature(payload, 'secret-b', signature, timestamp)).toBe(false);
   });
 });
+
+describe('Dispatcher timeout isolation', () => {
+  const config = {
+    url: 'https://example.com/webhook',
+    timeoutMs: 3000,
+    maxRetries: 0,
+    retryDelayMs: 1,
+    secret: 'ut-secret',
+    exponentialBackoff: false,
+  };
+
+  const fetchMock = vi.fn();
+
+  beforeEach(() => {
+    fetchMock.mockReset();
+    global.fetch = fetchMock;
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('isolates timeout cancellation between concurrent dispatch calls', async () => {
+    fetchMock.mockImplementation((_url: string, init?: RequestInit) => {
+      const signal = init?.signal as AbortSignal;
+
+      return new Promise((resolve, reject) => {
+        const onAbort = () => reject(new Error('This operation was aborted'));
+        signal.addEventListener('abort', onAbort, { once: true });
+
+        setTimeout(() => {
+          signal.removeEventListener('abort', onAbort);
+          resolve({
+            ok: true,
+            status: 200,
+            headers: {
+              get: () => 'application/json',
+            },
+            json: async () => ({ status: 'ok' }),
+          });
+        }, 60);
+      });
+    });
+
+    const dispatcher = new Dispatcher(config);
+
+    const firstCall = dispatcher.dispatch(
+      {
+        id: 'evt-timeout-1',
+        event: 'custom.notification',
+        timestamp: 1_700_000_000_100,
+      },
+      {
+        timeout: 15,
+        maxRetries: 0,
+      }
+    );
+
+    const secondCall = dispatcher.dispatch(
+      {
+        id: 'evt-timeout-2',
+        event: 'custom.notification',
+        timestamp: 1_700_000_000_101,
+      },
+      {
+        timeout: 250,
+        maxRetries: 0,
+      }
+    );
+
+    const [firstResult, secondResult] = await Promise.all([firstCall, secondCall]);
+
+    expect(firstResult.success).toBe(false);
+    expect(firstResult.error).toMatch(/abort/i);
+    expect(secondResult.success).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+});

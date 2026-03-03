@@ -15,7 +15,7 @@ import { signWebhookPayload } from './signature.js';
 /** HTTP 分发器 */
 export class Dispatcher {
   private config: DispatcherConfig;
-  private abortController: AbortController | null = null;
+  private inflightControllers: Set<AbortController> = new Set();
 
   constructor(config: DispatcherConfig) {
     this.config = config;
@@ -110,20 +110,21 @@ export class Dispatcher {
     init: RequestInit & { timeout?: number },
     timeout: number
   ): Promise<Response> {
-    this.abortController = new AbortController();
+    const controller = new AbortController();
+    this.inflightControllers.add(controller);
     const timeoutId = setTimeout(() => {
-      this.abortController?.abort();
+      controller.abort();
     }, timeout);
 
     try {
       const response = await fetch(url, {
         ...init,
-        signal: this.abortController.signal,
+        signal: controller.signal,
       });
       return response;
     } finally {
       clearTimeout(timeoutId);
-      this.abortController = null;
+      this.inflightControllers.delete(controller);
     }
   }
 
@@ -171,8 +172,10 @@ export class Dispatcher {
 
   /** 取消正在进行的请求 */
   abort(): void {
-    this.abortController?.abort();
-    this.abortController = null;
+    for (const controller of this.inflightControllers) {
+      controller.abort();
+    }
+    this.inflightControllers.clear();
   }
 
   /** 睡眠指定毫秒 */
