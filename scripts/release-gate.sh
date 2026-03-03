@@ -36,14 +36,6 @@ ensure_no_matches() {
   echo -e "${GREEN}PASS${NC}: $name"
 }
 
-report_match_count() {
-  local name="$1"
-  local command="$2"
-  local count
-  count="$(bash -lc "$command || true" | wc -l | tr -d ' ')"
-  echo -e "${BLUE}INFO${NC}: $name = $count"
-}
-
 echo "=========================================="
 echo "Voice Hub Release Gate"
 echo "=========================================="
@@ -63,13 +55,13 @@ ensure_no_matches \
   "No ': any' in non-test TypeScript sources" \
   "grep -rn \": any\" --include=\"*.ts\" --include=\"*.tsx\" packages/ apps/ | grep -v \"test\\|spec\""
 
-report_match_count \
-  "console.* in non-test TypeScript sources" \
+ensure_no_matches \
+  "No console.* in non-test TypeScript sources" \
   "grep -rn \"console\\.\" --include=\"*.ts\" --include=\"*.tsx\" packages/ apps/ | grep -v \"test\\|spec\""
 
-report_match_count \
-  "catch blocks in non-test TypeScript sources" \
-  "grep -rn \"catch.*{\" --include=\"*.ts\" --include=\"*.tsx\" packages/ apps/ | grep -v \"test\\|spec\""
+ensure_no_matches \
+  "No bare catch blocks in non-test TypeScript sources" \
+  "grep -rn \"catch[[:space:]]*{\" --include=\"*.ts\" --include=\"*.tsx\" packages/ apps/ | grep -v \"test\\|spec\""
 
 echo ""
 echo -e "${GREEN}Release gate passed.${NC}"

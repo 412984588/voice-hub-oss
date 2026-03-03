@@ -62,6 +62,10 @@ export interface Config {
 
 export { configSchema, CONSTANTS };
 
+function writeErrorLine(message: string): void {
+  process.stderr.write(`${message}\n`);
+}
+
 /**
  * 从环境变量加载配置
  */
@@ -81,9 +85,9 @@ export function loadConfig(): Config {
     return parsed as Config;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('配置验证失败:');
+      writeErrorLine('配置验证失败:');
       for (const issue of error.issues) {
-        console.error(`  - ${issue.path.join('.')}: ${issue.message}`);
+        writeErrorLine(`  - ${issue.path.join('.')}: ${issue.message}`);
       }
     }
     throw new Error('配置验证失败，请检查 .env 文件');

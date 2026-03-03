@@ -16,6 +16,7 @@ import { signWebhookPayload } from './signature.js';
 export class Dispatcher {
   private config: DispatcherConfig;
   private inflightControllers: Set<AbortController> = new Set();
+  private lastHealthCheckError: string | null = null;
 
   constructor(config: DispatcherConfig) {
     this.config = config;
@@ -190,10 +191,17 @@ export class Dispatcher {
         method: 'HEAD',
         signal: AbortSignal.timeout(5000),
       });
+      this.lastHealthCheckError = null;
       return response.ok || response.status === 405; // 405 Method Not Allowed 也算健康
-    } catch {
+    } catch (error) {
+      this.lastHealthCheckError = error instanceof Error ? error.message : String(error);
       return false;
     }
+  }
+
+  /** 获取最近一次健康检查失败原因 */
+  getLastHealthCheckError(): string | null {
+    return this.lastHealthCheckError;
   }
 }
 
