@@ -6,7 +6,7 @@
 
 import type { Config } from '@voice-hub/shared-config';
 import type { VoiceRuntime } from '@voice-hub/core-runtime';
-import type { WebhookPayload } from '@voice-hub/shared-types';
+import type { AudioFrame, WebhookPayload } from '@voice-hub/shared-types';
 import {
   isWebhookTimestampFresh,
   verifyWebhookSignature,
@@ -22,6 +22,8 @@ export class VoiceHubServer {
   private runtime: VoiceRuntime;
   private server: ReturnType<typeof Fastify>;
   private isRunning = false;
+  private readonly ttsRequestTimeoutMs = 5000;
+  private readonly ttsRetryCount = 2;
 
   constructor(config: Config, runtime: VoiceRuntime) {
     this.config = config;
@@ -95,18 +97,37 @@ export class VoiceHubServer {
     // TTS（发送文本到语音）
     this.server.post('/api/sessions/:sessionId/tts', async (request, reply) => {
       const { sessionId } = request.params as { sessionId: string };
-      const { text } = request.body as { text: string };
+      const { text } = request.body as { text?: string };
 
-      // TODO: 实现 TTS
-      return { success: true, message: 'TTS not yet implemented' };
+      if (typeof text !== 'string' || text.trim().length === 0) {
+        return reply.code(400).send({ error: 'text is required' });
+      }
+
+      const session = this.runtime.getSession(sessionId);
+      if (!session) {
+        return reply.code(404).send({ error: 'Session not found' });
+      }
+
+      const synthesis = await this.synthesizeText(text.trim());
+      await this.runtime.sendAudio(sessionId, synthesis.frame);
+
+      return {
+        success: true,
+        source: synthesis.source,
+        samples: synthesis.frame.data.length,
+      };
     });
 
     // Webhook 接收
     this.server.post(`${this.config.webhookPath}`, async (request, reply) => {
-      const payload = request.body as WebhookPayload;
+      const payload = request.body;
       const signature = this.getSingleHeaderValue(request.headers['x-webhook-signature']);
       const timestamp = this.getSingleHeaderValue(request.headers['x-webhook-timestamp']);
       const legacySecret = this.getSingleHeaderValue(request.headers['x-webhook-secret']);
+
+      if (!this.isWebhookPayload(payload)) {
+        return reply.code(400).send({ error: 'Invalid webhook payload' });
+      }
 
       if (signature && timestamp) {
         if (!isWebhookTimestampFresh(timestamp)) {
@@ -120,10 +141,8 @@ export class VoiceHubServer {
         return reply.code(401).send({ error: 'Unauthorized' });
       }
 
-      // 处理 webhook
-      // TODO: 实现完整的 webhook 处理逻辑
-
-      return { success: true };
+      const result = await this.processWebhookPayload(payload);
+      return { success: true, ...result };
     });
 
     // 状态
@@ -282,5 +301,209 @@ export class VoiceHubServer {
     }
 
     return timingSafeEqual(leftBuffer, rightBuffer);
+  }
+
+  private isWebhookPayload(payload: unknown): payload is WebhookPayload {
+    if (typeof payload !== 'object' || payload === null) {
+      return false;
+    }
+
+    const record = payload as Record<string, unknown>;
+    return (
+      typeof record.id === 'string' &&
+      typeof record.event === 'string' &&
+      typeof record.timestamp === 'number'
+    );
+  }
+
+  private async processWebhookPayload(payload: WebhookPayload): Promise<Record<string, unknown>> {
+    switch (payload.event) {
+      case 'backend_task.completed': {
+        const sessionId = this.extractSessionId(payload);
+        const announceText = this.extractAnnouncementText(payload);
+        const announced = sessionId && announceText
+          ? await this.emitTts(sessionId, announceText)
+          : false;
+        return { handled: true, event: payload.event, announced };
+      }
+      case 'custom.notification': {
+        const sessionId = this.extractSessionId(payload);
+        const announceText = this.extractNotificationText(payload);
+        const announced = sessionId && announceText
+          ? await this.emitTts(sessionId, announceText)
+          : false;
+        return { handled: true, event: payload.event, announced };
+      }
+      default:
+        return { handled: false, event: payload.event };
+    }
+  }
+
+  private extractSessionId(payload: WebhookPayload): string | null {
+    if (payload.sessionId) {
+      return payload.sessionId;
+    }
+
+    if (typeof payload.data === 'object' && payload.data !== null) {
+      const sessionId = (payload.data as Record<string, unknown>).sessionId;
+      if (typeof sessionId === 'string' && sessionId.length > 0) {
+        return sessionId;
+      }
+    }
+
+    return null;
+  }
+
+  private extractAnnouncementText(payload: WebhookPayload): string | null {
+    if (typeof payload.data !== 'object' || payload.data === null) {
+      return null;
+    }
+
+    const data = payload.data as Record<string, unknown>;
+    const result = data.result;
+    if (typeof result !== 'object' || result === null) {
+      return null;
+    }
+
+    const normalized = result as Record<string, unknown>;
+    const shouldAnnounce = normalized.shouldAnnounce === true;
+    if (!shouldAnnounce) {
+      return null;
+    }
+
+    if (typeof normalized.announcementText === 'string' && normalized.announcementText.trim().length > 0) {
+      return normalized.announcementText.trim();
+    }
+
+    if (typeof normalized.summary === 'string' && normalized.summary.trim().length > 0) {
+      return normalized.summary.trim();
+    }
+
+    return null;
+  }
+
+  private extractNotificationText(payload: WebhookPayload): string | null {
+    if (typeof payload.data !== 'object' || payload.data === null) {
+      return null;
+    }
+
+    const text = (payload.data as Record<string, unknown>).text;
+    if (typeof text === 'string' && text.trim().length > 0) {
+      return text.trim();
+    }
+
+    return null;
+  }
+
+  private async emitTts(sessionId: string, text: string): Promise<boolean> {
+    const session = this.runtime.getSession(sessionId);
+    if (!session) {
+      return false;
+    }
+
+    const synthesis = await this.synthesizeText(text);
+    await this.runtime.sendAudio(sessionId, synthesis.frame);
+    return true;
+  }
+
+  private async synthesizeText(text: string): Promise<{ frame: AudioFrame; source: 'tts-api' | 'fallback' }> {
+    const fromApi = await this.synthesizeFromApi(text);
+    if (fromApi) {
+      return { frame: fromApi, source: 'tts-api' };
+    }
+    return { frame: this.synthesizeFallback(text), source: 'fallback' };
+  }
+
+  private async synthesizeFromApi(text: string): Promise<AudioFrame | null> {
+    const ttsApiUrl = process.env.TTS_API_URL?.trim();
+    if (!ttsApiUrl) {
+      return null;
+    }
+
+    const apiKey = process.env.TTS_API_KEY?.trim();
+    let lastError: Error | null = null;
+
+    for (let attempt = 0; attempt <= this.ttsRetryCount; attempt++) {
+      try {
+        const response = await fetch(ttsApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {}),
+          },
+          body: JSON.stringify({ text }),
+          signal: AbortSignal.timeout(this.ttsRequestTimeoutMs),
+        });
+
+        if (!response.ok) {
+          throw new Error(`TTS API error: ${response.status}`);
+        }
+
+        const body = await response.json() as Record<string, unknown>;
+        const audioBase64 = body.audioBase64;
+        if (typeof audioBase64 !== 'string' || audioBase64.length === 0) {
+          throw new Error('TTS API missing audioBase64');
+        }
+
+        const sampleRate = Number(body.sampleRate ?? this.config.audioSampleRate);
+        const channels = Number(body.channels ?? this.config.audioChannels);
+        return this.decodePcm16(audioBase64, sampleRate, channels);
+      } catch (error) {
+        lastError = error as Error;
+        if (attempt < this.ttsRetryCount) {
+          await this.sleep(200 * (attempt + 1));
+        }
+      }
+    }
+
+    this.server.log.warn({ err: lastError }, 'TTS API failed, falling back to local synth');
+    return null;
+  }
+
+  private decodePcm16(audioBase64: string, sampleRate: number, channels: number): AudioFrame {
+    const buffer = Buffer.from(audioBase64, 'base64');
+    const length = Math.floor(buffer.byteLength / 2);
+    const pcm = new Int16Array(length);
+
+    for (let i = 0; i < length; i++) {
+      pcm[i] = buffer.readInt16LE(i * 2);
+    }
+
+    return {
+      data: pcm,
+      sampleRate,
+      channels,
+      timestamp: Date.now(),
+      sequence: Date.now() % Number.MAX_SAFE_INTEGER,
+    };
+  }
+
+  private synthesizeFallback(text: string): AudioFrame {
+    const sampleRate = this.config.audioSampleRate;
+    const channels = this.config.audioChannels;
+    const durationMs = Math.min(2000, Math.max(200, text.length * 30));
+    const sampleCount = Math.max(1, Math.floor(sampleRate * durationMs / 1000));
+    const pcm = new Int16Array(sampleCount * channels);
+
+    const amplitude = Math.floor(0.2 * 32767);
+    const frequency = 220;
+    for (let i = 0; i < sampleCount; i++) {
+      const value = Math.floor(amplitude * Math.sin((2 * Math.PI * frequency * i) / sampleRate));
+      for (let ch = 0; ch < channels; ch++) {
+        pcm[(i * channels) + ch] = value;
+      }
+    }
+
+    return {
+      data: pcm,
+      sampleRate,
+      channels,
+      timestamp: Date.now(),
+      sequence: Date.now() % Number.MAX_SAFE_INTEGER,
+    };
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
