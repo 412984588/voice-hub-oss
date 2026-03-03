@@ -50,7 +50,7 @@ function createRuntimeMock() {
   };
 }
 
-describe('VoiceHubServer TODO implementations', () => {
+describe('VoiceHubServer route implementations', () => {
   beforeEach(() => {
     delete process.env.TTS_API_URL;
     delete process.env.TTS_API_KEY;

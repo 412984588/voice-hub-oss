@@ -24,6 +24,13 @@ describe('secret-scan-core', () => {
     expect(shouldScanFileName('logo.png')).toBe(false);
   });
 
+  it('only excludes real test-like filenames', () => {
+    expect(shouldScanFileName('auth.todo.ts')).toBe(true);
+    expect(shouldScanFileName('service.todo.test.ts')).toBe(false);
+    expect(shouldScanFileName('user.spec.ts')).toBe(false);
+    expect(shouldScanFileName('api.test.ts')).toBe(false);
+  });
+
   it('finds JWT-like payload safely', () => {
     const jwtHeader = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
     const jwtBody = 'abc123';

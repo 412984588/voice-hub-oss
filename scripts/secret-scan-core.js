@@ -27,6 +27,7 @@ export const PATTERNS = [
 
 const INCLUDED_EXTENSIONS = new Set(['.ts', '.js', '.json', '.md']);
 const INCLUDED_FILES = new Set(['.env', '.env.example']);
+const TEST_FILE_PATTERN = /\.(test|spec)\.[cm]?[jt]sx?$/;
 
 function toGlobalRegex(regex) {
   const flags = regex.flags.includes('g') ? regex.flags : `${regex.flags}g`;
@@ -46,7 +47,7 @@ function getLineMetadata(content, matchIndex) {
 
 export function shouldScanFileName(fileName) {
   // 排除测试文件
-  if (fileName.includes('.test.') || fileName.includes('.spec.') || fileName.includes('.todo.')) {
+  if (TEST_FILE_PATTERN.test(fileName)) {
     return false;
   }
 
