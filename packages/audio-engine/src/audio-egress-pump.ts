@@ -69,6 +69,10 @@ export class AudioEgressPump {
     }
 
     this.queue.push(frame);
+
+    if (this.state === AudioSenderState.PLAYING && !this.isSending) {
+      void this.processQueue();
+    }
   }
 
   /** 处理队列 */
