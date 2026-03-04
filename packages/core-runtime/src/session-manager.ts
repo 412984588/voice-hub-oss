@@ -182,10 +182,20 @@ export class SessionManager extends EventEmitter implements ISessionManager {
     }
 
     // 设置新超时
-    sessionData.destroyTimeout = setTimeout(async () => {
+    sessionData.destroyTimeout = setTimeout(() => {
       // 检查会话是否仍然空闲
       if (sessionData.stateMachine.currentState === SessionState.IDLE) {
-        await this.destroySession(sessionId);
+        void this.destroySession(sessionId).catch((error) => {
+          this.emit('error', {
+            type: 'error',
+            sessionId,
+            timestamp: Date.now(),
+            data: {
+              code: 'SESSION_TIMEOUT_DESTROY_FAILED',
+              message: error instanceof Error ? error.message : String(error),
+            },
+          } as RuntimeEvent);
+        });
       }
     }, this.config.sessionTimeoutMs);
   }
