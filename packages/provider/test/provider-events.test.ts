@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { DoubaoProvider } from '../src/doubao-provider.js';
 import { LocalMockProvider } from '../src/local-mock-provider.js';
 
 describe('provider events', () => {
@@ -24,5 +25,28 @@ describe('provider events', () => {
       subType: 'connected',
       provider: 'local-mock',
     });
+  });
+
+  it('does not duplicate connected when session_started is emitted repeatedly', () => {
+    const provider = new DoubaoProvider({
+      sessionId: 's1',
+      url: 'ws://mock.local',
+      sampleRate: 16000,
+      channels: 1,
+      appId: 'app-id',
+      accessToken: 'token',
+    });
+
+    const connected = vi.fn();
+    provider.on('connected', connected);
+    const handleMessage = (
+      provider as unknown as {
+        handleMessage: (data: Buffer | string | ArrayBuffer) => void;
+      }
+    ).handleMessage;
+    handleMessage.call(provider, JSON.stringify({ type: 'session_started' }));
+    handleMessage.call(provider, JSON.stringify({ type: 'session_started' }));
+
+    expect(connected).toHaveBeenCalledTimes(1);
   });
 });
