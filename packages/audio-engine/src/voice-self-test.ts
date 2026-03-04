@@ -4,10 +4,10 @@
  * 语音自测工具
  */
 
-import type { AudioFrame } from "@voice-hub/shared-types";
-import type { AudioEngineConfig, VoiceSelfTestResult } from "./types.js";
-import { AudioIngressPump } from "./audio-ingress-pump.js";
-import { AudioEgressPump } from "./audio-egress-pump.js";
+import type { AudioFrame } from '@voice-hub/shared-types';
+import type { AudioEngineConfig, VoiceSelfTestResult } from './types.js';
+import { AudioIngressPump } from './audio-ingress-pump.js';
+import { AudioEgressPump } from './audio-egress-pump.js';
 
 /** 语音自测类 */
 export class VoiceSelfTest {
@@ -35,7 +35,7 @@ export class VoiceSelfTest {
 
   /** 运行所有测试 */
   async run(): Promise<VoiceSelfTestResult> {
-    console.log("Starting voice self-test...");
+    console.log('Starting voice self-test...');
 
     // Opus 编解码测试
     await this.testOpusCodec();
@@ -50,14 +50,12 @@ export class VoiceSelfTest {
     await this.testConnectionStability();
 
     // 计算总体结果
-    this.results.passed = Object.values(this.results.checks).every(
-      (check) => check.passed,
-    );
+    this.results.passed = Object.values(this.results.checks).every((check) => check.passed);
 
     if (this.results.passed) {
-      console.log("✅ All tests passed!");
+      console.log('✅ All tests passed!');
     } else {
-      console.log("❌ Some tests failed");
+      console.log('❌ Some tests failed');
     }
 
     return this.results;
@@ -65,7 +63,7 @@ export class VoiceSelfTest {
 
   /** Opus 编解码测试 */
   private async testOpusCodec(): Promise<void> {
-    console.log("Testing Opus codec...");
+    console.log('Testing Opus codec...');
 
     try {
       // 生成测试音频
@@ -81,19 +79,19 @@ export class VoiceSelfTest {
       // 由于我们没有实际的 Opus 编解码器，这里只是模拟
 
       this.results.checks.opusCodec = { passed: true };
-      console.log("  ✅ Opus codec test passed");
+      console.log('  ✅ Opus codec test passed');
     } catch (error) {
       this.results.checks.opusCodec = {
         passed: false,
         error: error instanceof Error ? error.message : String(error),
       };
-      console.log("  ❌ Opus codec test failed:", error);
+      console.log('  ❌ Opus codec test failed:', error);
     }
   }
 
   /** 音频接收测试 */
   private async testAudioReceive(): Promise<void> {
-    console.log("Testing audio receive...");
+    console.log('Testing audio receive...');
 
     return new Promise((resolve) => {
       let framesReceived = 0;
@@ -106,7 +104,7 @@ export class VoiceSelfTest {
           if (framesReceived >= 5) {
             ingress.stop();
             this.results.checks.audioReceive = { passed: true };
-            console.log("  ✅ Audio receive test passed");
+            console.log('  ✅ Audio receive test passed');
             resolve();
           }
         },
@@ -115,15 +113,15 @@ export class VoiceSelfTest {
             passed: false,
             error: error.message,
           };
-          console.log("  ❌ Audio receive test failed:", error);
+          console.log('  ❌ Audio receive test failed:', error);
           resolve();
         },
         onTimeout: () => {
           this.results.checks.audioReceive = {
             passed: false,
-            error: "Receive timeout",
+            error: 'Receive timeout',
           };
-          console.log("  ❌ Audio receive test failed: timeout");
+          console.log('  ❌ Audio receive test failed: timeout');
           resolve();
         },
       });
@@ -143,7 +141,7 @@ export class VoiceSelfTest {
         const packet = Buffer.from(
           testFrame.data.buffer,
           testFrame.data.byteOffset,
-          testFrame.data.byteLength,
+          testFrame.data.byteLength
         );
         ingress.receivePacket(packet, i);
       }
@@ -154,9 +152,9 @@ export class VoiceSelfTest {
           ingress.stop();
           this.results.checks.audioReceive = {
             passed: false,
-            error: "Not enough frames received",
+            error: 'Not enough frames received',
           };
-          console.log("  ❌ Audio receive test failed: insufficient frames");
+          console.log('  ❌ Audio receive test failed: insufficient frames');
           resolve();
         }
       }, 2000);
@@ -165,7 +163,7 @@ export class VoiceSelfTest {
 
   /** 音频发送测试 */
   private async testAudioSend(): Promise<void> {
-    console.log("Testing audio send...");
+    console.log('Testing audio send...');
 
     try {
       const egress = new AudioEgressPump(this.config);
@@ -192,19 +190,19 @@ export class VoiceSelfTest {
       this.results.stats.packetsSent = stats.packetsSent;
 
       this.results.checks.audioSend = { passed: stats.packetsSent > 0 };
-      console.log("  ✅ Audio send test passed");
+      console.log('  ✅ Audio send test passed');
     } catch (error) {
       this.results.checks.audioSend = {
         passed: false,
         error: error instanceof Error ? error.message : String(error),
       };
-      console.log("  ❌ Audio send test failed:", error);
+      console.log('  ❌ Audio send test failed:', error);
     }
   }
 
   /** 连接稳定性测试 */
   private async testConnectionStability(): Promise<void> {
-    console.log("Testing connection stability...");
+    console.log('Testing connection stability...');
 
     try {
       // 模拟持续的音频流
@@ -218,22 +216,18 @@ export class VoiceSelfTest {
       }
 
       this.results.checks.connectionStability = { passed: true };
-      console.log("  ✅ Connection stability test passed");
+      console.log('  ✅ Connection stability test passed');
     } catch (error) {
       this.results.checks.connectionStability = {
         passed: false,
         error: error instanceof Error ? error.message : String(error),
       };
-      console.log("  ❌ Connection stability test failed:", error);
+      console.log('  ❌ Connection stability test failed:', error);
     }
   }
 
   /** 生成正弦波测试音频 */
-  private generateSineWave(
-    sampleRate: number,
-    frequency: number,
-    duration: number,
-  ): Int16Array {
+  private generateSineWave(sampleRate: number, frequency: number, duration: number): Int16Array {
     const numSamples = Math.floor(sampleRate * duration);
     const data = new Int16Array(numSamples);
     const amplitude = 0.3 * 32768; // 30% 音量

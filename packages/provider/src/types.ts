@@ -4,11 +4,7 @@
  * 语音提供商类型定义
  */
 
-import type {
-  AudioFrame,
-  ProviderEvent,
-  ProviderError,
-} from "@voice-hub/shared-types";
+import type { AudioFrame, ProviderEvent, ProviderError } from '@voice-hub/shared-types';
 
 /** 音频帧推送回调 */
 export type PushAudioCallback = (frame: AudioFrame) => void;
@@ -18,12 +14,12 @@ export type EventListener = (event: ProviderEvent) => void;
 
 /** 提供商状态 */
 export enum ProviderState {
-  IDLE = "idle",
-  CONNECTING = "connecting",
-  READY = "ready",
-  STREAMING = "streaming",
-  ERROR = "error",
-  CLOSED = "closed",
+  IDLE = 'idle',
+  CONNECTING = 'connecting',
+  READY = 'ready',
+  STREAMING = 'streaming',
+  ERROR = 'error',
+  CLOSED = 'closed',
 }
 
 /** 提供商能力标志 */
@@ -33,7 +29,7 @@ export interface ProviderCapabilities {
   /** 是否支持中断 */
   interruption: boolean;
   /** 支持的音频编解码器 */
-  codecs: ReadonlyArray<"pcm" | "opus" | "mp3">;
+  codecs: ReadonlyArray<'pcm' | 'opus' | 'mp3'>;
   /** 支持的采样率 */
   sampleRates: ReadonlyArray<number>;
 }
@@ -98,12 +94,9 @@ export interface IAudioProvider {
   onAudio(callback: PushAudioCallback): void;
 
   /** 注册事件监听器 */
-  on(event: "provider", listener: EventListener): void;
-  on(
-    event: "connected" | "disconnected" | "ready" | "error",
-    listener: EventListener,
-  ): void;
-  on(event: "audio", listener: PushAudioCallback): void;
+  on(event: 'provider', listener: EventListener): void;
+  on(event: 'connected' | 'disconnected' | 'ready' | 'error', listener: EventListener): void;
+  on(event: 'audio', listener: PushAudioCallback): void;
 
   /** 取消注册 */
   off(event: string, listener: EventListener | PushAudioCallback): void;

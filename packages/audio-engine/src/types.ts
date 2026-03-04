@@ -2,7 +2,10 @@
  * Audio Engine 内部类型定义
  */
 
-import type { AudioFrame, AudioStats } from "@voice-hub/shared-types";
+import type {
+  AudioFrame,
+  AudioStats,
+} from '@voice-hub/shared-types';
 
 /**
  * 音频引擎配置
@@ -60,20 +63,20 @@ export interface AudioReceiverCallbacks {
  * 音频发送器状态
  */
 export enum AudioSenderState {
-  IDLE = "idle",
-  PLAYING = "playing",
-  PAUSED = "paused",
-  ERROR = "error",
+  IDLE = 'idle',
+  PLAYING = 'playing',
+  PAUSED = 'paused',
+  ERROR = 'error',
 }
 
 /**
  * 音频接收器状态
  */
 export enum AudioReceiverState {
-  IDLE = "idle",
-  RECEIVING = "receiving",
-  SILENCE = "silence",
-  ERROR = "error",
+  IDLE = 'idle',
+  RECEIVING = 'receiving',
+  SILENCE = 'silence',
+  ERROR = 'error',
 }
 
 /**

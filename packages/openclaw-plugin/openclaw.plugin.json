@@ -41,16 +41,8 @@
       "name": "create_session",
       "description": "Create a new voice session",
       "params": {
-        "userId": {
-          "type": "string",
-          "required": false,
-          "description": "Optional user identifier"
-        },
-        "channelId": {
-          "type": "string",
-          "required": false,
-          "description": "Optional Discord voice channel ID"
-        }
+        "userId": { "type": "string", "required": false, "description": "Optional user identifier" },
+        "channelId": { "type": "string", "required": false, "description": "Optional Discord voice channel ID" }
       },
       "returns": { "type": "string", "description": "Session ID" }
     },
@@ -58,69 +50,42 @@
       "name": "destroy_session",
       "description": "Destroy an existing voice session",
       "params": {
-        "sessionId": {
-          "type": "string",
-          "required": true,
-          "description": "Session ID to destroy"
-        }
+        "sessionId": { "type": "string", "required": true, "description": "Session ID to destroy" }
       }
     },
     {
       "name": "start_listening",
       "description": "Start listening for voice input",
       "params": {
-        "sessionId": {
-          "type": "string",
-          "required": true,
-          "description": "Session ID"
-        }
+        "sessionId": { "type": "string", "required": true, "description": "Session ID" }
       }
     },
     {
       "name": "stop_listening",
       "description": "Stop listening for voice input",
       "params": {
-        "sessionId": {
-          "type": "string",
-          "required": true,
-          "description": "Session ID"
-        }
+        "sessionId": { "type": "string", "required": true, "description": "Session ID" }
       }
     },
     {
       "name": "send_audio",
       "description": "Send audio data to the session",
       "params": {
-        "sessionId": {
-          "type": "string",
-          "required": true,
-          "description": "Session ID"
-        },
-        "audioData": {
-          "type": "ArrayBuffer",
-          "required": true,
-          "description": "Audio data in base64 or binary"
-        }
+        "sessionId": { "type": "string", "required": true, "description": "Session ID" },
+        "audioData": { "type": "ArrayBuffer", "required": true, "description": "Audio data in base64 or binary" }
       }
     },
     {
       "name": "get_status",
       "description": "Get current session status",
       "params": {
-        "sessionId": {
-          "type": "string",
-          "required": true,
-          "description": "Session ID"
-        }
-      },
+        "sessionId": { "type": "string", "required": true, "description": "Session ID" }
+    },
       "returns": {
         "type": "object",
         "properties": {
           "state": { "type": "string", "description": "Current session state" },
-          "isActive": {
-            "type": "boolean",
-            "description": "Whether the session is active"
-          }
+          "isActive": { "type": "boolean", "description": "Whether the session is active" }
         }
       }
     }
@@ -128,26 +93,11 @@
 
   "events": {
     "emitted": [
-      {
-        "name": "session.created",
-        "description": "Fired when a new session is created"
-      },
-      {
-        "name": "session.destroyed",
-        "description": "Fired when a session is destroyed"
-      },
-      {
-        "name": "listening.started",
-        "description": "Fired when listening starts"
-      },
-      {
-        "name": "listening.stopped",
-        "description": "Fired when listening stops"
-      },
-      {
-        "name": "audio.received",
-        "description": "Fired when audio data is received"
-      },
+      { "name": "session.created", "description": "Fired when a new session is created" },
+      { "name": "session.destroyed", "description": "Fired when a session is destroyed" },
+      { "name": "listening.started", "description": "Fired when listening starts" },
+      { "name": "listening.stopped", "description": "Fired when listening stops" },
+      { "name": "audio.received", "description": "Fired when audio data is received" },
       { "name": "error", "description": "Fired when an error occurs" }
     ]
   },
@@ -159,31 +109,11 @@
 
   "configuration": {
     "env": [
-      {
-        "name": "VOICE_PROVIDER",
-        "description": "Voice provider: disabled, local-mock, doubao",
-        "default": "local-mock"
-      },
-      {
-        "name": "DISCORD_BOT_TOKEN",
-        "description": "Discord bot token",
-        "required": true
-      },
-      {
-        "name": "DISCORD_GUILD_ID",
-        "description": "Discord guild ID",
-        "required": true
-      },
-      {
-        "name": "WEBHOOK_PORT",
-        "description": "Webhook server port",
-        "default": "8848"
-      },
-      {
-        "name": "WEBHOOK_SECRET",
-        "description": "Webhook signature secret",
-        "required": true
-      }
+      { "name": "VOICE_PROVIDER", "description": "Voice provider: disabled, local-mock, doubao", "default": "local-mock" },
+      { "name": "DISCORD_BOT_TOKEN", "description": "Discord bot token", "required": true },
+      { "name": "DISCORD_GUILD_ID", "description": "Discord guild ID", "required": true },
+      { "name": "WEBHOOK_PORT", "description": "Webhook server port", "default": "8848" },
+      { "name": "WEBHOOK_SECRET", "description": "Webhook signature secret", "required": true }
     ],
     "configFiles": [".env"]
   },

@@ -60,7 +60,7 @@ export class JitterBuffer {
     if (this.items.has(this.nextSequenceNumber)) {
       const item = this.items.get(this.nextSequenceNumber)!;
       this.items.delete(this.nextSequenceNumber);
-      this.nextSequenceNumber = (this.nextSequenceNumber + 1) % 0xffff;
+      this.nextSequenceNumber = (this.nextSequenceNumber + 1) % 0x10000;
       return item.buffer;
     }
 
@@ -75,7 +75,7 @@ export class JitterBuffer {
       this.nextSequenceNumber = newestKey;
       const item = this.items.get(newestKey)!;
       this.items.delete(newestKey);
-      this.nextSequenceNumber = (this.nextSequenceNumber + 1) % 0xffff;
+      this.nextSequenceNumber = (this.nextSequenceNumber + 1) % 0x10000;
       return item.buffer;
     }
 

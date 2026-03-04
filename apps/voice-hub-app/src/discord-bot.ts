@@ -4,18 +4,13 @@
  * Discord Bot 实现
  */
 
-import { Client, GatewayIntentBits } from "discord.js";
-import {
-  joinVoiceChannel,
-  createAudioPlayer,
-  createAudioResource,
-  AudioPlayerStatus,
-} from "@discordjs/voice";
-import { Readable } from "stream";
-import type { Config } from "@voice-hub/shared-config";
-import type { VoiceRuntime } from "@voice-hub/core-runtime";
-import type { AudioFrame } from "@voice-hub/shared-types";
-import type { IAudioProvider } from "@voice-hub/provider";
+import { Client, GatewayIntentBits } from 'discord.js';
+import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus } from '@discordjs/voice';
+import { Readable } from 'stream';
+import type { Config } from '@voice-hub/shared-config';
+import type { VoiceRuntime } from '@voice-hub/core-runtime';
+import type { AudioFrame } from '@voice-hub/shared-types';
+import type { IAudioProvider } from '@voice-hub/provider';
 
 /** Discord Bot 类 */
 export class DiscordBot {
@@ -45,21 +40,16 @@ export class DiscordBot {
 
   /** 设置事件处理器 */
   private setupEventHandlers(): void {
-    this.client.once("ready", () => {
+    this.client.once('ready', () => {
       this.logInfo(`Discord bot logged in as ${this.client.user?.tag}`);
     });
 
-    this.client.on("voiceStateUpdate", async (oldState, newState) => {
+    this.client.on('voiceStateUpdate', async (oldState, newState) => {
       // 检测用户加入/离开语音频道
-      if (
-        newState.channelId &&
-        newState.channelId === this.config.discordVoiceChannelId
-      ) {
+      if (newState.channelId && newState.channelId === this.config.discordVoiceChannelId) {
         // 用户加入
         if (!oldState.channelId) {
-          this.logInfo(
-            `User ${newState.member?.user.tag} joined voice channel`,
-          );
+          this.logInfo(`User ${newState.member?.user.tag} joined voice channel`);
           await this.handleUserJoined(newState.member?.id);
         }
       } else if (oldState.channelId === this.config.discordVoiceChannelId) {
@@ -69,23 +59,23 @@ export class DiscordBot {
       }
     });
 
-    this.client.on("error", (error) => {
-      this.logError("Discord client error", error);
+    this.client.on('error', (error) => {
+      this.logError('Discord client error', error);
     });
   }
 
   /** 设置音频播放器 */
   private setupAudioPlayer(): void {
     this.audioPlayer.on(AudioPlayerStatus.Idle, () => {
-      this.logInfo("Audio player is idle");
+      this.logInfo('Audio player is idle');
     });
 
     this.audioPlayer.on(AudioPlayerStatus.Playing, () => {
-      this.logInfo("Audio player is playing");
+      this.logInfo('Audio player is playing');
     });
 
-    this.audioPlayer.on("error", (error) => {
-      this.logError("Audio player error", error);
+    this.audioPlayer.on('error', (error) => {
+      this.logError('Audio player error', error);
     });
   }
 
@@ -103,7 +93,7 @@ export class DiscordBot {
     // 创建会话
     this.sessionId = await this.runtime.createSession(
       this.client.user?.id,
-      this.config.discordVoiceChannelId,
+      this.config.discordVoiceChannelId
     );
 
     this.isRunning = true;
@@ -136,12 +126,10 @@ export class DiscordBot {
   /** 加入语音频道 */
   private async joinVoiceChannel(): Promise<void> {
     const guild = await this.client.guilds.fetch(this.config.discordGuildId);
-    const channel = await guild.channels.fetch(
-      this.config.discordVoiceChannelId,
-    );
+    const channel = await guild.channels.fetch(this.config.discordVoiceChannelId);
 
     if (!channel || !channel.isVoiceBased()) {
-      throw new Error("Channel is not a voice channel");
+      throw new Error('Channel is not a voice channel');
     }
 
     this.currentConnection = joinVoiceChannel({
@@ -154,7 +142,7 @@ export class DiscordBot {
     const subscription = this.currentConnection.subscribe(this.audioPlayer);
 
     if (subscription) {
-      this.logInfo("Subscribed to audio connection");
+      this.logInfo('Subscribed to audio connection');
     }
   }
 
@@ -189,8 +177,9 @@ export class DiscordBot {
   }
 
   private logError(message: string, error: unknown): void {
-    const detail =
-      error instanceof Error ? (error.stack ?? error.message) : String(error);
+    const detail = error instanceof Error
+      ? (error.stack ?? error.message)
+      : String(error);
     process.stderr.write(`[discord-bot] ${message}: ${detail}\n`);
   }
 }

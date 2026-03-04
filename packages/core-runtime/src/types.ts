@@ -4,14 +4,10 @@
  * 核心运行时类型定义
  */
 
-import type {
-  SessionState,
-  AudioFrame,
-  ProviderEvent,
-} from "@voice-hub/shared-types";
-import type { IAudioProvider } from "@voice-hub/provider";
-import type { MemoryStore } from "@voice-hub/memory-bank";
-import type { Dispatcher } from "@voice-hub/backend-dispatcher";
+import type { SessionState, AudioFrame, ProviderEvent } from '@voice-hub/shared-types';
+import type { IAudioProvider } from '@voice-hub/provider';
+import type { MemoryStore } from '@voice-hub/memory-bank';
+import type { Dispatcher } from '@voice-hub/backend-dispatcher';
 
 /** 会话事件 */
 export interface RuntimeSessionEvent {
@@ -28,17 +24,17 @@ export interface RuntimeSessionEvent {
 /** 会话事件类型 */
 export enum SessionEventType {
   /** 会话创建 */
-  CREATED = "created",
+  CREATED = 'created',
   /** 会话启动 */
-  STARTED = "started",
+  STARTED = 'started',
   /** 会话停止 */
-  STOPPED = "stopped",
+  STOPPED = 'stopped',
   /** 会话销毁 */
-  DESTROYED = "destroyed",
+  DESTROYED = 'destroyed',
   /** 状态变更 */
-  STATE_CHANGED = "state_changed",
+  STATE_CHANGED = 'state_changed',
   /** 错误 */
-  ERROR = "error",
+  ERROR = 'error',
 }
 
 /** 运行时配置 */
@@ -101,13 +97,7 @@ export interface IStateMachine {
 
 /** 运行时事件 */
 export interface RuntimeEvent {
-  type:
-    | "session_created"
-    | "session_destroyed"
-    | "state_changed"
-    | "audio_received"
-    | "audio_sent"
-    | "error";
+  type: 'session_created' | 'session_destroyed' | 'state_changed' | 'audio_received' | 'audio_sent' | 'error';
   sessionId?: string;
   timestamp: number;
   data?: unknown;

@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
-import type { AudioFrame } from "@voice-hub/shared-types";
-import { Packetizer } from "../src/packetizer.js";
+import { describe, expect, it } from 'vitest';
+import type { AudioFrame } from '@voice-hub/shared-types';
+import { Packetizer } from '../src/packetizer.js';
 
 function createFrame(sampleCount: number): AudioFrame {
   const data = new Int16Array(sampleCount);
@@ -17,8 +17,8 @@ function createFrame(sampleCount: number): AudioFrame {
   };
 }
 
-describe("Packetizer", () => {
-  it("splits audio by sample count and preserves payload boundaries", () => {
+describe('Packetizer', () => {
+  it('splits audio by sample count and preserves payload boundaries', () => {
     const packetizer = new Packetizer({
       targetSampleRate: 16000,
       targetChannels: 1,
@@ -42,7 +42,7 @@ describe("Packetizer", () => {
     expect(secondPayload.readInt16LE(638)).toBe(639);
   });
 
-  it("uses RTP-compatible uint32 timestamps without overflow errors", () => {
+  it('uses RTP-compatible uint32 timestamps without overflow errors', () => {
     const packetizer = new Packetizer({
       targetSampleRate: 16000,
       targetChannels: 1,

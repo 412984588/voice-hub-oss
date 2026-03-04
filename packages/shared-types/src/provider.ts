@@ -7,11 +7,11 @@
  */
 export enum ProviderType {
   /** 禁用 (仅本地 mock) */
-  DISABLED = "disabled",
+  DISABLED = 'disabled',
   /** 本地 mock (测试用) */
-  LOCAL_MOCK = "local-mock",
+  LOCAL_MOCK = 'local-mock',
   /** 火山引擎豆包 */
-  DOUBAO = "doubao",
+  DOUBAO = 'doubao',
 }
 
 /**
@@ -19,13 +19,13 @@ export enum ProviderType {
  */
 export enum ProviderState {
   /** 未连接 */
-  DISCONNECTED = "disconnected",
+  DISCONNECTED = 'disconnected',
   /** 连接中 */
-  CONNECTING = "connecting",
+  CONNECTING = 'connecting',
   /** 已连接 */
-  CONNECTED = "connected",
+  CONNECTED = 'connected',
   /** 错误 */
-  ERROR = "error",
+  ERROR = 'error',
 }
 
 /**
@@ -82,7 +82,7 @@ export interface TTSRequest {
   /** 要播报的文本 */
   text: string;
   /** 优先级 */
-  priority: "immediate" | "normal" | "low";
+  priority: 'immediate' | 'normal' | 'low';
   /** 会话 ID */
   sessionId: string;
 }

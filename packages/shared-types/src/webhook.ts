@@ -7,11 +7,11 @@
  */
 export enum WebhookEventType {
   /** 后台任务完成 */
-  BACKEND_TASK_COMPLETED = "backend_task.completed",
+  BACKEND_TASK_COMPLETED = 'backend_task.completed',
   /** 后台任务失败 */
-  BACKEND_TASK_FAILED = "backend_task.failed",
+  BACKEND_TASK_FAILED = 'backend_task.failed',
   /** 自定义通知 */
-  CUSTOM_NOTIFICATION = "custom.notification",
+  CUSTOM_NOTIFICATION = 'custom.notification',
 }
 
 /**
@@ -19,13 +19,13 @@ export enum WebhookEventType {
  */
 export interface WebhookHeaders {
   /** 签名 */
-  "x-webhook-signature"?: string;
+  'x-webhook-signature'?: string;
   /** 时间戳 */
-  "x-webhook-timestamp"?: string;
+  'x-webhook-timestamp'?: string;
   /** 事件 ID */
-  "x-webhook-id"?: string;
+  'x-webhook-id'?: string;
   /** 事件类型 */
-  "x-webhook-event"?: string;
+  'x-webhook-event'?: string;
 }
 
 /**

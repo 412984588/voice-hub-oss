@@ -4,10 +4,10 @@
  * 音频发送泵 - 向 Discord 发送音频数据
  */
 
-import type { AudioFrame, AudioStats } from "@voice-hub/shared-types";
-import type { AudioEngineConfig } from "./types.js";
-import { AudioSenderState } from "./types.js";
-import { Packetizer } from "./packetizer.js";
+import type { AudioFrame, AudioStats } from '@voice-hub/shared-types';
+import type { AudioEngineConfig } from './types.js';
+import { AudioSenderState } from './types.js';
+import { Packetizer } from './packetizer.js';
 
 /** 音频发送泵 */
 export class AudioEgressPump {
@@ -69,6 +69,10 @@ export class AudioEgressPump {
     }
 
     this.queue.push(frame);
+
+    if (this.state === AudioSenderState.PLAYING && !this.isSending) {
+      void this.processQueue();
+    }
   }
 
   /** 处理队列 */
@@ -92,7 +96,7 @@ export class AudioEgressPump {
           this.stats.packetsSent++;
         }
       } catch (error) {
-        this.logError("Error sending audio frame", error);
+        this.logError('Error sending audio frame', error);
         this.state = AudioSenderState.ERROR;
         break;
       }
@@ -141,8 +145,9 @@ export class AudioEgressPump {
   }
 
   private logError(message: string, error: unknown): void {
-    const detail =
-      error instanceof Error ? (error.stack ?? error.message) : String(error);
+    const detail = error instanceof Error
+      ? (error.stack ?? error.message)
+      : String(error);
     process.stderr.write(`[audio-egress-pump] ${message}: ${detail}\n`);
   }
 }

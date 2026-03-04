@@ -1,11 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   config: {
-    discordBotToken: "token",
-    discordGuildId: "guild",
-    discordVoiceChannelId: "voice",
-    discordClientId: "client",
+    discordBotToken: 'token',
+    discordGuildId: 'guild',
+    discordVoiceChannelId: 'voice',
+    discordClientId: 'client',
     doubaoRealtimeWsUrl: undefined,
     doubaoAppId: undefined,
     doubaoAccessToken: undefined,
@@ -13,17 +13,17 @@ const mocks = vi.hoisted(() => ({
     backendTimeoutMs: 30000,
     backendMaxRetries: 3,
     webhookPort: 8911,
-    webhookSecret: "test-webhook-secret",
-    webhookPath: "/webhook/callback",
+    webhookSecret: 'test-webhook-secret',
+    webhookPath: '/webhook/callback',
     voiceHubApiKey: undefined,
     webhookLegacySecretHeader: false,
     webhookShadowMode: false,
-    corsAllowedOrigins: ["http://localhost:3000"],
-    memoryDbPath: "./data/memory_bank.db",
+    corsAllowedOrigins: ['http://localhost:3000'],
+    memoryDbPath: './data/memory_bank.db',
     memoryWalEnabled: true,
     memoryBusyTimeout: 5000,
-    logLevel: "info",
-    logFormat: "json",
+    logLevel: 'info',
+    logFormat: 'json',
     logPretty: false,
     audioSampleRate: 16000,
     audioChannels: 1,
@@ -33,7 +33,7 @@ const mocks = vi.hoisted(() => ({
     sessionTimeoutMs: 300000,
     sessionMaxReconnectAttempts: 5,
     sessionReconnectDelayMs: 2000,
-    voiceProvider: "local-mock",
+    voiceProvider: 'local-mock',
   },
   runtimeStart: vi.fn(),
   runtimeStop: vi.fn(),
@@ -45,16 +45,16 @@ const mocks = vi.hoisted(() => ({
   dbClose: vi.fn(),
 }));
 
-vi.mock("@voice-hub/shared-config", () => ({
+vi.mock('@voice-hub/shared-config', () => ({
   loadConfig: () => mocks.config,
   validateConfigForProvider: () => ({ valid: true, errors: [] }),
 }));
 
-vi.mock("@voice-hub/provider", () => ({
+vi.mock('@voice-hub/provider', () => ({
   createProvider: () => null,
 }));
 
-vi.mock("@voice-hub/memory-bank", () => ({
+vi.mock('@voice-hub/memory-bank', () => ({
   DatabaseManager: class {
     init(): void {
       mocks.dbInit();
@@ -67,11 +67,11 @@ vi.mock("@voice-hub/memory-bank", () => ({
   MemoryStore: class {},
 }));
 
-vi.mock("@voice-hub/backend-dispatcher", () => ({
+vi.mock('@voice-hub/backend-dispatcher', () => ({
   Dispatcher: class {},
 }));
 
-vi.mock("@voice-hub/core-runtime", () => ({
+vi.mock('@voice-hub/core-runtime', () => ({
   VoiceRuntime: class {
     start = mocks.runtimeStart;
     stop = mocks.runtimeStop;
@@ -88,23 +88,23 @@ vi.mock("@voice-hub/core-runtime", () => ({
   },
 }));
 
-vi.mock("../src/discord-bot.js", () => ({
+vi.mock('../src/discord-bot.js', () => ({
   DiscordBot: class {
     start = mocks.discordStart;
     stop = mocks.discordStop;
   },
 }));
 
-vi.mock("../src/server.js", () => ({
+vi.mock('../src/server.js', () => ({
   VoiceHubServer: class {
     start = mocks.serverStart;
     stop = mocks.serverStop;
   },
 }));
 
-import { VoiceHubApp } from "../src/index.js";
+import { VoiceHubApp } from '../src/index.js';
 
-describe("VoiceHubApp startup rollback", () => {
+describe('VoiceHubApp startup rollback', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.runtimeStart.mockResolvedValue(undefined);
@@ -115,11 +115,11 @@ describe("VoiceHubApp startup rollback", () => {
     mocks.serverStop.mockResolvedValue(undefined);
   });
 
-  it("rolls back started components when server startup fails", async () => {
-    mocks.serverStart.mockRejectedValueOnce(new Error("server startup failed"));
+  it('rolls back started components when server startup fails', async () => {
+    mocks.serverStart.mockRejectedValueOnce(new Error('server startup failed'));
     const app = new VoiceHubApp();
 
-    await expect(app.start()).rejects.toThrow("server startup failed");
+    await expect(app.start()).rejects.toThrow('server startup failed');
 
     expect(mocks.runtimeStart).toHaveBeenCalledTimes(1);
     expect(mocks.discordStart).toHaveBeenCalledTimes(1);

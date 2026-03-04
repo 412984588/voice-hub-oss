@@ -4,12 +4,12 @@
  * 豆包实时语音提供商
  */
 
-import { randomUUID } from "node:crypto";
-import { WebSocket } from "ws";
-import type { AudioFrame, ProviderEvent } from "@voice-hub/shared-types";
-import type { ProviderConfig } from "./types.js";
-import { BaseProvider } from "./base-provider.js";
-import { ProviderState } from "./types.js";
+import { randomUUID } from 'node:crypto';
+import { WebSocket } from 'ws';
+import type { AudioFrame, ProviderEvent } from '@voice-hub/shared-types';
+import type { ProviderConfig } from './types.js';
+import { BaseProvider } from './base-provider.js';
+import { ProviderState } from './types.js';
 
 interface DoubaoConfig extends ProviderConfig {
   appId: string;
@@ -17,13 +17,13 @@ interface DoubaoConfig extends ProviderConfig {
 }
 
 interface DoubaoServerMessage {
-  type: "session_started" | "audio" | "error" | "session_ended";
+  type: 'session_started' | 'audio' | 'error' | 'session_ended';
   data?: unknown;
 }
 
 interface DoubaoAudioData {
   audio: string; // base64 encoded audio
-  format?: "pcm" | "opus";
+  format?: 'pcm' | 'opus';
   sampleRate?: number;
   channels?: number;
 }
@@ -38,58 +38,51 @@ export class DoubaoProvider extends BaseProvider {
   readonly capabilities = {
     fullDuplex: true,
     interruption: true,
-    codecs: ["pcm", "opus"] as const,
+    codecs: ['pcm', 'opus'] as const,
     sampleRates: [8000, 12000, 16000, 24000],
   };
 
   private ws: WebSocket | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private heartbeatInterval: ReturnType<typeof setInterval> | null = null;
+  private connectedEventEmitted = false;
 
   constructor(config: DoubaoConfig) {
     super(config);
     if (!config.appId || !config.accessToken) {
-      throw new Error("Doubao provider requires appId and accessToken");
+      throw new Error('Doubao provider requires appId and accessToken');
     }
   }
 
   async connect(): Promise<void> {
-    if (
-      this._state === ProviderState.CONNECTING ||
-      this._state === ProviderState.READY
-    ) {
+    if (this._state === ProviderState.CONNECTING || this._state === ProviderState.READY) {
       return;
     }
 
     this.setState(ProviderState.CONNECTING);
+    this.connectedEventEmitted = false;
 
     try {
       const url = new URL(this._config.url);
-      url.searchParams.set("app_id", (this._config as DoubaoConfig).appId);
-      url.searchParams.set("session_id", this._config.sessionId);
+      url.searchParams.set('app_id', (this._config as DoubaoConfig).appId);
+      url.searchParams.set('session_id', this._config.sessionId);
 
       this.ws = new WebSocket(url.toString(), {
         headers: {
-          "User-Agent": "voice-hub/0.1.0",
-          Authorization: `Bearer ${(this._config as DoubaoConfig).accessToken}`,
+          'User-Agent': 'voice-hub/0.1.0',
+          'Authorization': `Bearer ${(this._config as DoubaoConfig).accessToken}`,
         },
       });
 
-      this.ws.binaryType = "arraybuffer";
+      this.ws.binaryType = 'arraybuffer';
 
       await new Promise<void>((resolve, reject) => {
-        if (!this.ws) return reject(new Error("WebSocket not initialized"));
+        if (!this.ws) return reject(new Error('WebSocket not initialized'));
 
         this.ws.onopen = () => {
           this.setState(ProviderState.READY);
           this._stats.connectedAt = Date.now();
-          this.emitEvent({
-            type: "provider",
-            timestamp: Date.now(),
-            eventId: randomUUID(),
-            provider: "doubao",
-            subType: "connected",
-          });
+          this.emitConnectedEventOnce();
           this.startHeartbeat();
           resolve();
         };
@@ -98,14 +91,14 @@ export class DoubaoProvider extends BaseProvider {
           this.setState(ProviderState.ERROR);
           this.incrementErrors();
           this.emitEvent({
-            type: "provider",
+            type: 'provider',
             timestamp: Date.now(),
             eventId: randomUUID(),
-            provider: "doubao",
-            subType: "error",
+            provider: 'doubao',
+            subType: 'error',
             data: {
-              code: "WS_ERROR",
-              message: "WebSocket connection error",
+              code: 'WS_ERROR',
+              message: 'WebSocket connection error',
               details: error,
             },
           });
@@ -136,12 +129,13 @@ export class DoubaoProvider extends BaseProvider {
     }
 
     this.setState(ProviderState.CLOSED);
+    this.connectedEventEmitted = false;
     this.emitEvent({
-      type: "provider",
+      type: 'provider',
       timestamp: Date.now(),
       eventId: randomUUID(),
-      provider: "doubao",
-      subType: "disconnected",
+      provider: 'doubao',
+      subType: 'disconnected',
     });
   }
 
@@ -154,11 +148,11 @@ export class DoubaoProvider extends BaseProvider {
 
     // 发送开始流消息
     this.sendJSON({
-      type: "start_stream",
+      type: 'start_stream',
       config: {
         sample_rate: this._config.sampleRate,
         channels: this._config.channels,
-        format: "pcm",
+        format: 'pcm',
       },
     });
   }
@@ -172,7 +166,7 @@ export class DoubaoProvider extends BaseProvider {
 
     // 发送停止流消息
     this.sendJSON({
-      type: "stop_stream",
+      type: 'stop_stream',
     });
   }
 
@@ -195,52 +189,46 @@ export class DoubaoProvider extends BaseProvider {
   private handleMessage(data: Buffer | string | ArrayBuffer): void {
     try {
       let jsonStr: string;
-      if (typeof data === "string") {
+      if (typeof data === 'string') {
         jsonStr = data;
       } else if (data instanceof Buffer) {
         jsonStr = data.toString();
       } else if (data instanceof ArrayBuffer) {
         jsonStr = Buffer.from(data).toString();
       } else {
-        throw new Error("Unknown data type");
+        throw new Error('Unknown data type');
       }
 
       const message = JSON.parse(jsonStr) as DoubaoServerMessage;
 
       switch (message.type) {
-        case "session_started":
-          this.emitEvent({
-            type: "provider",
-            timestamp: Date.now(),
-            eventId: randomUUID(),
-            provider: "doubao",
-            subType: "connected",
-          });
+        case 'session_started':
+          this.emitConnectedEventOnce();
           break;
 
-        case "audio":
+        case 'audio':
           this.handleAudioData(message.data as DoubaoAudioData);
           break;
 
-        case "error":
+        case 'error':
           this.handleError(message.data as DoubaoErrorMessage);
           break;
 
-        case "session_ended":
+        case 'session_ended':
           this.handleDisconnect();
           break;
       }
     } catch (error) {
       this.incrementErrors();
       this.emitEvent({
-        type: "provider",
+        type: 'provider',
         timestamp: Date.now(),
         eventId: randomUUID(),
-        provider: "doubao",
-        subType: "error",
+        provider: 'doubao',
+        subType: 'error',
         data: {
-          code: "DOUBAO_PARSE_ERROR",
-          message: "Failed to parse server message",
+          code: 'DOUBAO_PARSE_ERROR',
+          message: 'Failed to parse server message',
           details: error instanceof Error ? error.message : String(error),
         },
       });
@@ -251,7 +239,7 @@ export class DoubaoProvider extends BaseProvider {
     if (!data.audio) return;
 
     // 解码 base64 音频
-    const audioBuffer = Buffer.from(data.audio, "base64");
+    const audioBuffer = Buffer.from(data.audio, 'base64');
     const sampleCount = Math.floor(audioBuffer.byteLength / 2);
     const pcm = new Int16Array(sampleCount);
     for (let i = 0; i < sampleCount; i++) {
@@ -273,11 +261,11 @@ export class DoubaoProvider extends BaseProvider {
   private handleError(error: DoubaoErrorMessage): void {
     this.incrementErrors();
     this.emitEvent({
-      type: "provider",
+      type: 'provider',
       timestamp: Date.now(),
       eventId: randomUUID(),
-      provider: "doubao",
-      subType: "error",
+      provider: 'doubao',
+      subType: 'error',
       data: {
         code: `DOUBAO_${error.code}`,
         message: error.message,
@@ -288,12 +276,13 @@ export class DoubaoProvider extends BaseProvider {
   private handleDisconnect(): void {
     this.stopHeartbeat();
     this.setState(ProviderState.CLOSED);
+    this.connectedEventEmitted = false;
     this.emitEvent({
-      type: "provider",
+      type: 'provider',
       timestamp: Date.now(),
       eventId: randomUUID(),
-      provider: "doubao",
-      subType: "disconnected",
+      provider: 'doubao',
+      subType: 'disconnected',
     });
   }
 
@@ -304,16 +293,12 @@ export class DoubaoProvider extends BaseProvider {
 
   private prepareAudioData(frame: AudioFrame): Buffer {
     // 将 Int16Array 转换为 Buffer
-    return Buffer.from(
-      frame.data.buffer,
-      frame.data.byteOffset,
-      frame.data.byteLength,
-    );
+    return Buffer.from(frame.data.buffer, frame.data.byteOffset, frame.data.byteLength);
   }
 
   private startHeartbeat(): void {
     this.heartbeatInterval = setInterval(() => {
-      this.sendJSON({ type: "ping" });
+      this.sendJSON({ type: 'ping' });
     }, 30000); // 每 30 秒发送一次心跳
   }
 
@@ -322,5 +307,20 @@ export class DoubaoProvider extends BaseProvider {
       clearInterval(this.heartbeatInterval);
       this.heartbeatInterval = null;
     }
+  }
+
+  private emitConnectedEventOnce(): void {
+    if (this.connectedEventEmitted) {
+      return;
+    }
+
+    this.connectedEventEmitted = true;
+    this.emitEvent({
+      type: 'provider',
+      timestamp: Date.now(),
+      eventId: randomUUID(),
+      provider: 'doubao',
+      subType: 'connected',
+    });
   }
 }

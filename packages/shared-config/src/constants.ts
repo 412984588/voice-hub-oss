@@ -4,8 +4,8 @@
 
 export const CONSTANTS = {
   // 版本信息
-  VERSION: "0.1.0",
-  PROJECT_NAME: "voice-hub",
+  VERSION: '0.1.0',
+  PROJECT_NAME: 'voice-hub',
 
   // Discord API 限制
   DISCORD: {
@@ -22,7 +22,7 @@ export const CONSTANTS = {
     TARGET_SAMPLE_RATE: 16000, // 豆包要求 16kHz
     TARGET_CHANNELS: 1, // 单声道
     TARGET_BITS_PER_SAMPLE: 16, // int16
-    ENDIANNESS: "little-endian" as const,
+    ENDIANNESS: 'little-endian' as const,
     FRAME_DURATION_MS: 100, // 100ms 一帧
     BYTES_PER_SAMPLE: 2, // int16 = 2 bytes
   },
@@ -39,8 +39,8 @@ export const CONSTANTS = {
   // Webhook 安全
   WEBHOOK: {
     MAX_TIMESTAMP_DRIFT_SEC: 300, // 5 分钟
-    SIGNATURE_ALGORITHM: "sha256" as const,
-    SIGNATURE_HEADER_PREFIX: "sha256=",
+    SIGNATURE_ALGORITHM: 'sha256' as const,
+    SIGNATURE_HEADER_PREFIX: 'sha256=',
     MAX_REQUEST_SIZE_BYTES: 10 * 1024 * 1024, // 10MB
   },
 
@@ -61,15 +61,15 @@ export const CONSTANTS = {
 
   // 日志脱敏关键词
   SENSITIVE_KEYS: [
-    "token",
-    "secret",
-    "password",
-    "apikey",
-    "api_key",
-    "access_token",
-    "authorization",
-    "cookie",
-    "session",
+    'token',
+    'secret',
+    'password',
+    'apikey',
+    'api_key',
+    'access_token',
+    'authorization',
+    'cookie',
+    'session',
   ],
 } as const;
 

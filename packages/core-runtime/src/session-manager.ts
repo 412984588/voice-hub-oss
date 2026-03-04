@@ -4,19 +4,19 @@
  * 会话管理器
  */
 
-import { randomUUID } from "node:crypto";
-import { EventEmitter } from "eventemitter3";
-import { SessionState } from "@voice-hub/shared-types";
+import { randomUUID } from 'node:crypto';
+import { EventEmitter } from 'eventemitter3';
+import { SessionState } from '@voice-hub/shared-types';
 import type {
   SessionContext,
   ISessionManager,
   RuntimeConfig,
   RuntimeEvent,
-} from "./types.js";
-import { StateMachine } from "./state-machine.js";
-import type { IAudioProvider } from "@voice-hub/provider";
-import type { MemoryStore } from "@voice-hub/memory-bank";
-import type { Dispatcher } from "@voice-hub/backend-dispatcher";
+} from './types.js';
+import { StateMachine } from './state-machine.js';
+import type { IAudioProvider } from '@voice-hub/provider';
+import type { MemoryStore } from '@voice-hub/memory-bank';
+import type { Dispatcher } from '@voice-hub/backend-dispatcher';
 
 /** 会话数据 */
 interface SessionData {
@@ -36,7 +36,7 @@ export class SessionManager extends EventEmitter implements ISessionManager {
   constructor(
     config: RuntimeConfig,
     memoryStore?: MemoryStore,
-    dispatcher?: Dispatcher,
+    dispatcher?: Dispatcher
   ) {
     super();
     this.config = config;
@@ -45,7 +45,10 @@ export class SessionManager extends EventEmitter implements ISessionManager {
   }
 
   /** 创建会话 */
-  async createSession(userId?: string, channelId?: string): Promise<string> {
+  async createSession(
+    userId?: string,
+    channelId?: string
+  ): Promise<string> {
     const sessionId = randomUUID();
     const now = Date.now();
 
@@ -60,16 +63,13 @@ export class SessionManager extends EventEmitter implements ISessionManager {
     const stateMachine = new StateMachine(sessionId);
 
     // 监听状态变化
-    stateMachine.on("state_changed", (event: RuntimeEvent) => {
-      this.emit("state_changed", event);
+    stateMachine.on('state_changed', (event: RuntimeEvent) => {
+      this.emit('state_changed', event);
       this.updateSessionActivity(sessionId);
 
       // 同步到记忆存储
       if (this.memoryStore) {
-        const data = event.data as {
-          oldState: SessionState;
-          newState: SessionState;
-        };
+        const data = event.data as { oldState: SessionState; newState: SessionState };
         this.memoryStore.updateSessionState(sessionId, data.newState);
       }
     });
@@ -86,8 +86,8 @@ export class SessionManager extends EventEmitter implements ISessionManager {
       this.memoryStore.createSession(sessionId, userId, channelId);
     }
 
-    this.emit("session_created", {
-      type: "session_created",
+    this.emit('session_created', {
+      type: 'session_created',
       sessionId,
       timestamp: now,
       data: { userId, channelId },
@@ -119,8 +119,8 @@ export class SessionManager extends EventEmitter implements ISessionManager {
 
     this.sessions.delete(sessionId);
 
-    this.emit("session_destroyed", {
-      type: "session_destroyed",
+    this.emit('session_destroyed', {
+      type: 'session_destroyed',
       sessionId,
       timestamp: Date.now(),
     } as RuntimeEvent);
@@ -182,10 +182,20 @@ export class SessionManager extends EventEmitter implements ISessionManager {
     }
 
     // 设置新超时
-    sessionData.destroyTimeout = setTimeout(async () => {
+    sessionData.destroyTimeout = setTimeout(() => {
       // 检查会话是否仍然空闲
       if (sessionData.stateMachine.currentState === SessionState.IDLE) {
-        await this.destroySession(sessionId);
+        void this.destroySession(sessionId).catch((error) => {
+          this.emit('error', {
+            type: 'error',
+            sessionId,
+            timestamp: Date.now(),
+            data: {
+              code: 'SESSION_TIMEOUT_DESTROY_FAILED',
+              message: error instanceof Error ? error.message : String(error),
+            },
+          } as RuntimeEvent);
+        });
       }
     }, this.config.sessionTimeoutMs);
   }

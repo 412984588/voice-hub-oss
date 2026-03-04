@@ -26,13 +26,13 @@ pnpm add @voice-hub/openclaw-plugin
 ### 基本用法
 
 ```typescript
-import { createPlugin } from "@voice-hub/openclaw-plugin";
+import { createPlugin } from '@voice-hub/openclaw-plugin';
 
 // 创建插件实例
-const plugin = createPlugin("http://localhost:8848", "optional-api-key");
+const plugin = createPlugin('http://localhost:8848', 'optional-api-key');
 
 // 创建语音会话
-const sessionId = await plugin.createSession("user-123", "channel-456");
+const sessionId = await plugin.createSession('user-123', 'channel-456');
 
 // 开始监听语音输入
 await plugin.startListening(sessionId);
@@ -58,8 +58,8 @@ await plugin.sendAudio(sessionId, audioData);
 
 ```typescript
 const status = await plugin.getSessionStatus(sessionId);
-console.log(status.state); // 'IDLE', 'LISTENING', 'PROCESSING', etc.
-console.log(status.isActive); // true/false
+console.log(status.state);      // 'IDLE', 'LISTENING', 'PROCESSING', etc.
+console.log(status.isActive);   // true/false
 ```
 
 ## API 参考
@@ -121,13 +121,13 @@ console.log(status.isActive); // true/false
 
 插件通过环境变量进行配置：
 
-| 变量                | 说明               | 默认值       | 必需 |
-| ------------------- | ------------------ | ------------ | ---- |
-| `VOICE_PROVIDER`    | 语音提供商         | `local-mock` | 否   |
-| `DISCORD_BOT_TOKEN` | Discord 机器人令牌 | -            | 是   |
-| `DISCORD_GUILD_ID`  | Discord 服务器 ID  | -            | 是   |
-| `WEBHOOK_PORT`      | Webhook 端口       | `8848`       | 否   |
-| `WEBHOOK_SECRET`    | Webhook 签名密钥   | -            | 是   |
+| 变量 | 说明 | 默认值 | 必需 |
+|------|------|--------|------|
+| `VOICE_PROVIDER` | 语音提供商 | `local-mock` | 否 |
+| `DISCORD_BOT_TOKEN` | Discord 机器人令牌 | - | 是 |
+| `DISCORD_GUILD_ID` | Discord 服务器 ID | - | 是 |
+| `WEBHOOK_PORT` | Webhook 端口 | `8848` | 否 |
+| `WEBHOOK_SECRET` | Webhook 签名密钥 | - | 是 |
 
 ## 能力
 

@@ -79,7 +79,6 @@ Voice Hub 提供两个插件，分别用于 OpenClaw 和 Claude Code 集成：
 ```
 
 **功能**：
-
 - 会话管理（创建/销毁）
 - 语音输入/输出
 - 音频数据传输
@@ -97,7 +96,6 @@ Voice Hub 提供两个插件，分别用于 OpenClaw 和 Claude Code 集成：
 ```
 
 **功能**：
-
 - `voice.start` - 启动语音会话
 - `voice.stop` - 停止语音会话
 - `voice.status` - 获取会话状态

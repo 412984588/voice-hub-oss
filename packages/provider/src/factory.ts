@@ -4,26 +4,23 @@
  * 提供商工厂 - 根据配置创建相应的提供商实例
  */
 
-import type { Config } from "@voice-hub/shared-config";
-import type { IAudioProvider } from "./types.js";
-import { DoubaoProvider } from "./doubao-provider.js";
-import {
-  LocalMockProvider,
-  type LocalMockConfig,
-} from "./local-mock-provider.js";
-import { ProviderState } from "./types.js";
+import type { Config } from '@voice-hub/shared-config';
+import type { IAudioProvider } from './types.js';
+import { DoubaoProvider } from './doubao-provider.js';
+import { LocalMockProvider, type LocalMockConfig } from './local-mock-provider.js';
+import { ProviderState } from './types.js';
 
 /** 提供商类型 */
-export type ProviderType = "disabled" | "local-mock" | "doubao";
+export type ProviderType = 'disabled' | 'local-mock' | 'doubao';
 
 /** 创建提供商实例 */
 export function createProvider(
   config: Config,
-  sessionId: string,
+  sessionId: string
 ): IAudioProvider | null {
   const providerType = config.voiceProvider;
 
-  if (providerType === "disabled") {
+  if (providerType === 'disabled') {
     return null;
   }
 
@@ -34,23 +31,17 @@ export function createProvider(
   };
 
   switch (providerType) {
-    case "local-mock":
+    case 'local-mock':
       return new LocalMockProvider({
         ...baseConfig,
-        url: "ws://mock.local",
-        mode: "silence",
+        url: 'ws://mock.local',
+        mode: 'silence',
         latencyMs: 50,
       } as LocalMockConfig);
 
-    case "doubao":
-      if (
-        !config.doubaoRealtimeWsUrl ||
-        !config.doubaoAppId ||
-        !config.doubaoAccessToken
-      ) {
-        throw new Error(
-          "Doubao provider requires DOUBAO_REALTIME_WS_URL, DOUBAO_APP_ID, and DOUBAO_ACCESS_TOKEN",
-        );
+    case 'doubao':
+      if (!config.doubaoRealtimeWsUrl || !config.doubaoAppId || !config.doubaoAccessToken) {
+        throw new Error('Doubao provider requires DOUBAO_REALTIME_WS_URL, DOUBAO_APP_ID, and DOUBAO_ACCESS_TOKEN');
       }
       return new DoubaoProvider({
         ...baseConfig,
@@ -72,23 +63,23 @@ export function validateProviderConfig(config: Config): {
   const errors: string[] = [];
 
   switch (config.voiceProvider) {
-    case "doubao":
+    case 'doubao':
       if (!config.doubaoRealtimeWsUrl) {
-        errors.push("DOUBAO_REALTIME_WS_URL is required for doubao provider");
+        errors.push('DOUBAO_REALTIME_WS_URL is required for doubao provider');
       }
       if (!config.doubaoAppId) {
-        errors.push("DOUBAO_APP_ID is required for doubao provider");
+        errors.push('DOUBAO_APP_ID is required for doubao provider');
       }
       if (!config.doubaoAccessToken) {
-        errors.push("DOUBAO_ACCESS_TOKEN is required for doubao provider");
+        errors.push('DOUBAO_ACCESS_TOKEN is required for doubao provider');
       }
       break;
 
-    case "local-mock":
+    case 'local-mock':
       // 无需额外配置
       break;
 
-    case "disabled":
+    case 'disabled':
       // 禁用状态无需配置
       break;
 

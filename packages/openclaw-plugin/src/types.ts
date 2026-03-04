@@ -7,29 +7,29 @@
 /** Voice Hub 命令类型 */
 export type VoiceHubCommand =
   | {
-      action: "create_session";
+      action: 'create_session';
       userId?: string;
       channelId?: string;
     }
   | {
-      action: "destroy_session";
+      action: 'destroy_session';
       sessionId: string;
     }
   | {
-      action: "start_listening";
+      action: 'start_listening';
       sessionId: string;
     }
   | {
-      action: "stop_listening";
+      action: 'stop_listening';
       sessionId: string;
     }
   | {
-      action: "send_audio";
+      action: 'send_audio';
       sessionId: string;
       audio: string; // base64 encoded
     }
   | {
-      action: "get_status";
+      action: 'get_status';
       sessionId: string;
     };
 
@@ -48,7 +48,7 @@ export interface VoiceHubResponse {
 /** OpenClaw 集成接口 */
 export interface OpenClawIntegration {
   /** 插件名称 */
-  name: "voice-hub";
+  name: 'voice-hub';
 
   /** 插件版本 */
   version: string;
