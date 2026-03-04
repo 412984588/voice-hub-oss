@@ -1,0 +1,80 @@
+你是一个资深代码开发专家。请继续完成 Voice Hub 项目的剩余工作。
+
+## 已完成（上一轮）
+- ✅ CRITICAL: secret-scan 崩溃与误检修复
+- ✅ CRITICAL: Webhook 安全升级（HMAC-SHA256 签名）
+- ✅ HIGH: 包导出错误修复
+- ✅ HIGH: ESLint 工具链修复
+- ✅ MEDIUM: 文档对齐
+- ✅ 所有测试通过：typecheck, test, build, lint, secret-scan, smoke-test
+
+## 当前任务
+
+### 第一步：提交已完成的修复
+先提交上一轮的修复，使用规范的 commit message：
+
+```bash
+git add .
+git commit -m "fix: 全量审查修复 - secret-scan崩溃/Webhook安全/包导出/lint工具链
+
+- CRITICAL: 修复 secret-scan 正则语法错误、dirname 未导入、非全局正则死循环
+- CRITICAL: 升级 Webhook 安全为 HMAC-SHA256 签名 + 时间戳校验
+- HIGH: 修复 @voice-hub/shared-types 包导出路径错误
+- HIGH: 新增 ESLint v9 flat config 修复 lint 工具链
+- MEDIUM: 更新安全文档与实现对齐
+
+新增测试：
+- secret-scan-core.test.ts
+- dispatcher-security.test.ts
+- package-exports.test.ts
+
+验证：所有测试通过"
+```
+
+### 第二步：识别并实现剩余 TODO
+扫描项目中所有 `TODO`、`FIXME`、`XXX` 标记，按优先级分类：
+
+**高优先级 TODO**：
+- TTS 服务相关 TODO
+- Webhook 业务处理 TODO
+- 其他核心功能 TODO
+
+**低优先级 TODO**：
+- 优化类 TODO
+- 文档类 TODO
+- 可选功能 TODO
+
+## 工作流程
+
+1. **提交阶段**：先执行 git commit 保存已完成的工作
+2. **扫描阶段**：使用 `grep -rn "TODO\|FIXME\|XXX" --include="*.ts" --include="*.tsx" .` 扫描所有 TODO
+3. **分类阶段**：按优先级对 TODO 分类（高/中/低）
+4. **实现阶段**：逐一实现高优先级 TODO，每个实现后运行 `pnpm test` 验证
+5. **提交阶段**：每完成一批 TODO，创建一个原子提交
+
+## 执行规则
+
+- 每个 TODO 实现后立即运行 `pnpm test` 验证
+- 测试通过后创建原子提交（单次提交 ≤ 50 行）
+- 遇到需要设计的 TODO，先规划后实现
+- 不属于本轮的 TODO（如"未来优化"）保留原样
+
+## 输出格式
+
+扫描阶段输出：
+```
+[TODO 扫描] 发现 N 个待办
+- 高优先级: X 个（TTS / Webhook / 核心功能）
+- 中优先级: Y 个
+- 低优先级: Z 个
+```
+
+每个实现输出：
+```
+[实现] [HIGH] packages/xxx/src/yyy.ts:42
+TODO: 实现 TTS 服务调用逻辑
+方案: 使用 fetch 调用 TTS API，添加超时和重试
+验证: pnpm test 通过
+```
+
+开始执行。

@@ -1,0 +1,37 @@
+{
+  "name": "@voice-hub/shared-config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./schema": {
+      "types": "./src/schema.d.ts",
+      "import": "./src/schema.js"
+    },
+    "./constants": {
+      "types": "./src/constants.d.ts",
+      "import": "./src/constants.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint src",
+    "format": "prettier --write src"
+  },
+  "dependencies": {
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.12.0",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  }
+}

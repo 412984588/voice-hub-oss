@@ -1,0 +1,45 @@
+{
+  "name": "voice-hub-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "全双工语音中间层 - OpenClaw + Claude Code 双插件",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r --filter './packages/**' --filter './apps/**' run build",
+    "typecheck": "pnpm -r --filter './packages/**' --filter './apps/**' run typecheck",
+    "test": "pnpm -r --filter './packages/**' --filter './apps/**' run test",
+    "lint": "pnpm -r --filter './packages/**' --filter './apps/**' run lint",
+    "format": "pnpm -r --filter './packages/**' --filter './apps/**' run format",
+    "doctor": "node scripts/doctor.js",
+    "secret-scan": "node scripts/secret-scan.js",
+    "clean": "rm -rf node_modules **/node_modules **/dist",
+    "pack-openclaw": "bash scripts/pack-openclaw-plugin.sh",
+    "install-openclaw-local": "bash scripts/install-openclaw-local.sh",
+    "install-claude-local": "bash scripts/install-claude-plugin-local.sh",
+    "bootstrap": "pnpm install && pnpm build",
+    "release:gate": "bash scripts/release-gate.sh"
+  },
+  "keywords": [
+    "voice",
+    "discord",
+    "realtime",
+    "openclaw",
+    "claude-code"
+  ],
+  "author": "Voice Hub Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.12.0",
+    "@typescript-eslint/eslint-plugin": "^8.19.1",
+    "@typescript-eslint/parser": "^8.19.1",
+    "eslint": "^9.18.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  },
+  "engines": {
+    "node": ">=22.12.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
