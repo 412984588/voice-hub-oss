@@ -8,10 +8,11 @@ import type { Config } from '@voice-hub/shared-config';
 import type { IAudioProvider } from './types.js';
 import { DoubaoProvider } from './doubao-provider.js';
 import { LocalMockProvider, type LocalMockConfig } from './local-mock-provider.js';
+import { QwenDashscopeProvider } from './qwen-dashscope-provider.js';
 import { ProviderState } from './types.js';
 
 /** 提供商类型 */
-export type ProviderType = 'disabled' | 'local-mock' | 'doubao';
+export type ProviderType = 'disabled' | 'local-mock' | 'doubao' | 'qwen-dashscope';
 
 /** 创建提供商实例 */
 export function createProvider(
@@ -50,6 +51,19 @@ export function createProvider(
         accessToken: config.doubaoAccessToken,
       });
 
+    case 'qwen-dashscope':
+      if (!config.qwenRealtimeWsUrl || !config.qwenApiKey) {
+        throw new Error('Qwen provider requires QWEN_REALTIME_WS_URL and QWEN_API_KEY');
+      }
+      return new QwenDashscopeProvider({
+        ...baseConfig,
+        url: config.qwenRealtimeWsUrl,
+        apiKey: config.qwenApiKey,
+        model: config.qwenModel || 'qwen3-omni-flash-realtime',
+        voice: config.qwenVoice,
+        region: config.qwenRegion,
+      });
+
     default:
       throw new Error(`Unknown provider type: ${providerType}`);
   }
@@ -77,6 +91,15 @@ export function validateProviderConfig(config: Config): {
 
     case 'local-mock':
       // 无需额外配置
+      break;
+
+    case 'qwen-dashscope':
+      if (!config.qwenRealtimeWsUrl) {
+        errors.push('QWEN_REALTIME_WS_URL is required for qwen-dashscope provider');
+      }
+      if (!config.qwenApiKey) {
+        errors.push('QWEN_API_KEY is required for qwen-dashscope provider');
+      }
       break;
 
     case 'disabled':
