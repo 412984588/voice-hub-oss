@@ -23,9 +23,9 @@ export interface AudioFrame {
  */
 export enum AudioDirection {
   /** 入站音频 (用户说话) */
-  INGRESS = "ingress",
+  INGRESS = 'ingress',
   /** 出站音频 (AI 回复) */
-  EGRESS = "egress",
+  EGRESS = 'egress',
 }
 
 /**

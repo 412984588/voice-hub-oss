@@ -4,7 +4,7 @@
  * 音频重采样器 - 转换采样率和声道数
  */
 
-import type { AudioFrame } from "@voice-hub/shared-types";
+import type { AudioFrame } from '@voice-hub/shared-types';
 
 /** 重采样器 */
 export class Resampler {
@@ -12,7 +12,7 @@ export class Resampler {
   static resample(
     frame: AudioFrame,
     targetSampleRate: number,
-    targetChannels: number,
+    targetChannels: number
   ): AudioFrame {
     const { data, sampleRate, channels } = frame;
 
@@ -34,7 +34,7 @@ export class Resampler {
         processed,
         sampleRate,
         targetSampleRate,
-        targetChannels,
+        targetChannels
       );
     }
 
@@ -51,7 +51,7 @@ export class Resampler {
   private static convertChannels(
     data: Int16Array,
     fromChannels: number,
-    toChannels: number,
+    toChannels: number
   ): Int16Array {
     if (fromChannels === toChannels) {
       return data;
@@ -93,7 +93,7 @@ export class Resampler {
     data: Int16Array,
     fromRate: number,
     toRate: number,
-    channels: number,
+    channels: number
   ): Int16Array {
     const ratio = fromRate / toRate;
     const outputLength = Math.floor(data.length / ratio);
@@ -121,7 +121,7 @@ export class Resampler {
   static calculateOutputLength(
     inputLength: number,
     inputRate: number,
-    outputRate: number,
+    outputRate: number
   ): number {
     return Math.floor((inputLength * outputRate) / inputRate);
   }

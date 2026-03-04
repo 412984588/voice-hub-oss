@@ -7,23 +7,22 @@
 
 /** 插件清单 */
 export const MANIFEST = {
-  id: "voice-hub",
-  name: "Voice Hub",
-  version: "0.1.0",
-  description:
-    "Real-time voice interaction middleware for Claude Code and OpenClaw",
-  author: "Voice Hub Team",
-  license: "MIT",
-  homepage: "https://github.com/voice-hub/voice-hub",
-  repository: "https://github.com/voice-hub/voice-hub",
+  id: 'voice-hub',
+  name: 'Voice Hub',
+  version: '0.1.0',
+  description: 'Real-time voice interaction middleware for Claude Code and OpenClaw',
+  author: 'Voice Hub Team',
+  license: 'MIT',
+  homepage: 'https://github.com/voice-hub/voice-hub',
+  repository: 'https://github.com/voice-hub/voice-hub',
   keywords: [
-    "voice",
-    "audio",
-    "discord",
-    "realtime",
-    "openclaw",
-    "claude-code",
-    "mcp",
+    'voice',
+    'audio',
+    'discord',
+    'realtime',
+    'openclaw',
+    'claude-code',
+    'mcp',
   ],
 
   capabilities: {
@@ -35,67 +34,70 @@ export const MANIFEST = {
   },
 
   compatibility: {
-    claudeCode: ">=1.0.0",
-    openclaw: ">=0.1.0",
-    node: ">=22.12.0",
+    claudeCode: '>=1.0.0',
+    openclaw: '>=0.1.0',
+    node: '>=22.12.0',
   },
 
   dependencies: {
-    runtime: ["@voice-hub/core-runtime"],
-    optional: ["@voice-hub/openclaw-plugin", "@voice-hub/claude-mcp-server"],
+    runtime: ['@voice-hub/core-runtime'],
+    optional: [
+      '@voice-hub/openclaw-plugin',
+      '@voice-hub/claude-mcp-server',
+    ],
   },
 
   installation: {
-    type: "npm",
-    package: "@voice-hub/claude-marketplace",
+    type: 'npm',
+    package: '@voice-hub/claude-marketplace',
   },
 
   configuration: {
     env: [
-      "DISCORD_BOT_TOKEN",
-      "DISCORD_GUILD_ID",
-      "DISCORD_VOICE_CHANNEL_ID",
-      "VOICE_PROVIDER", // 'disabled' | 'local-mock' | 'doubao'
-      "DOUBAO_REALTIME_WS_URL",
-      "DOUBAO_APP_ID",
-      "DOUBAO_ACCESS_TOKEN",
-      "MEMORY_DB_PATH",
-      "WEBHOOK_PORT",
-      "WEBHOOK_SECRET",
+      'DISCORD_BOT_TOKEN',
+      'DISCORD_GUILD_ID',
+      'DISCORD_VOICE_CHANNEL_ID',
+      'VOICE_PROVIDER', // 'disabled' | 'local-mock' | 'doubao'
+      'DOUBAO_REALTIME_WS_URL',
+      'DOUBAO_APP_ID',
+      'DOUBAO_ACCESS_TOKEN',
+      'MEMORY_DB_PATH',
+      'WEBHOOK_PORT',
+      'WEBHOOK_SECRET',
     ],
-    configFiles: [".env"],
+    configFiles: ['.env'],
   },
 } as const;
 
 /** Claude Code 插件配置 */
 export const CLAUDE_CODE_PLUGIN = {
-  name: "Voice Hub",
-  id: "voice-hub",
+  name: 'Voice Hub',
+  id: 'voice-hub',
 
   commands: [
     {
-      name: "voice.start",
-      description: "Start a new voice session",
-      handler: "handleVoiceStart",
+      name: 'voice.start',
+      description: 'Start a new voice session',
+      handler: 'handleVoiceStart',
     },
     {
-      name: "voice.stop",
-      description: "Stop the current voice session",
-      handler: "handleVoiceStop",
+      name: 'voice.stop',
+      description: 'Stop the current voice session',
+      handler: 'handleVoiceStop',
     },
     {
-      name: "voice.status",
-      description: "Get current voice session status",
-      handler: "handleVoiceStatus",
+      name: 'voice.status',
+      description: 'Get current voice session status',
+      handler: 'handleVoiceStatus',
     },
     {
-      name: "voice.text",
-      description: "Send text to be spoken",
-      handler: "handleVoiceText",
+      name: 'voice.text',
+      description: 'Send text to be spoken',
+      handler: 'handleVoiceText',
       params: [
         {
-          name: "text",
-          description: "The text to speak",
+          name: 'text',
+          description: 'The text to speak',
           required: true,
         },
       ],
@@ -104,48 +106,48 @@ export const CLAUDE_CODE_PLUGIN = {
 
   settings: [
     {
-      key: "voice.provider",
-      title: "Voice Provider",
-      description: "Select the voice service provider",
-      type: "select",
+      key: 'voice.provider',
+      title: 'Voice Provider',
+      description: 'Select the voice service provider',
+      type: 'select',
       options: [
-        { value: "disabled", label: "Disabled" },
-        { value: "local-mock", label: "Local Mock (Testing)" },
-        { value: "doubao", label: "Doubao Realtime" },
+        { value: 'disabled', label: 'Disabled' },
+        { value: 'local-mock', label: 'Local Mock (Testing)' },
+        { value: 'doubao', label: 'Doubao Realtime' },
       ],
-      default: "local-mock",
+      default: 'local-mock',
     },
     {
-      key: "voice.autoStart",
-      title: "Auto-start Listening",
-      description: "Automatically start listening when session is created",
-      type: "boolean",
+      key: 'voice.autoStart',
+      title: 'Auto-start Listening',
+      description: 'Automatically start listening when session is created',
+      type: 'boolean',
       default: false,
     },
     {
-      key: "voice.saveAudio",
-      title: "Save Audio Files",
-      description: "Save audio recordings to disk",
-      type: "boolean",
+      key: 'voice.saveAudio',
+      title: 'Save Audio Files',
+      description: 'Save audio recordings to disk',
+      type: 'boolean',
       default: false,
     },
   ],
 
   notifications: [
     {
-      event: "session.started",
-      message: "Voice session started",
-      type: "info",
+      event: 'session.started',
+      message: 'Voice session started',
+      type: 'info',
     },
     {
-      event: "session.ended",
-      message: "Voice session ended",
-      type: "info",
+      event: 'session.ended',
+      message: 'Voice session ended',
+      type: 'info',
     },
     {
-      event: "error",
-      message: "Voice error occurred",
-      type: "error",
+      event: 'error',
+      message: 'Voice error occurred',
+      type: 'error',
     },
   ],
 };
@@ -230,3 +232,4 @@ await hub.destroySession(sessionId);
 
 /** 导出所有内容 */
 export { MANIFEST as default };
+

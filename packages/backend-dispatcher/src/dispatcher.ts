@@ -4,13 +4,13 @@
  * 后端分发器实现
  */
 
-import type { WebhookPayload, WebhookResponse } from "@voice-hub/shared-types";
+import type { WebhookPayload, WebhookResponse } from '@voice-hub/shared-types';
 import type {
   DispatcherConfig,
   DispatchOptions,
   DispatchResult,
-} from "./types.js";
-import { signWebhookPayload } from "./signature.js";
+} from './types.js';
+import { signWebhookPayload } from './signature.js';
 
 /** HTTP 分发器 */
 export class Dispatcher {
@@ -30,7 +30,7 @@ export class Dispatcher {
   /** 分发到后端 */
   async dispatch(
     payload: WebhookPayload,
-    options: DispatchOptions = {},
+    options: DispatchOptions = {}
   ): Promise<DispatchResult> {
     const startTime = Date.now();
     const timeout = options.timeout ?? this.config.timeoutMs;
@@ -50,26 +50,22 @@ export class Dispatcher {
         const result = await this.fetchWithTimeout(
           this.config.url,
           {
-            method: "POST",
+            method: 'POST',
             headers: {
-              "Content-Type": "application/json",
-              "User-Agent": "voice-hub/0.1.0",
+              'Content-Type': 'application/json',
+              'User-Agent': 'voice-hub/0.1.0',
               ...(options.headers ?? {}),
-              ...(webhookSignature
-                ? {
-                    "X-Webhook-Signature": webhookSignature,
-                    "X-Webhook-Timestamp": webhookTimestamp,
-                  }
-                : {}),
-              ...(options.requestId
-                ? {
-                    "X-Request-ID": options.requestId,
-                  }
-                : {}),
+              ...(webhookSignature ? {
+                'X-Webhook-Signature': webhookSignature,
+                'X-Webhook-Timestamp': webhookTimestamp,
+              } : {}),
+              ...(options.requestId ? {
+                'X-Request-ID': options.requestId,
+              } : {}),
             },
             body: JSON.stringify(payload),
           },
-          timeout,
+          timeout
         );
 
         const response = await this.parseResponse(result);
@@ -103,7 +99,7 @@ export class Dispatcher {
     const durationMs = Date.now() - startTime;
     return {
       success: false,
-      error: lastError?.message || "Unknown error",
+      error: lastError?.message || 'Unknown error',
       attempts,
       durationMs,
     };
@@ -113,7 +109,7 @@ export class Dispatcher {
   private async fetchWithTimeout(
     url: string,
     init: RequestInit & { timeout?: number },
-    timeout: number,
+    timeout: number
   ): Promise<Response> {
     const controller = new AbortController();
     this.inflightControllers.add(controller);
@@ -139,16 +135,16 @@ export class Dispatcher {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    const contentType = response.headers.get("content-type");
-    if (!contentType?.includes("application/json")) {
+    const contentType = response.headers.get('content-type');
+    if (!contentType?.includes('application/json')) {
       throw new Error(`Unexpected content type: ${contentType}`);
     }
 
-    const data = (await response.json()) as unknown;
+    const data = await response.json() as unknown;
 
     // 验证响应格式
     if (!this.isValidWebhookResponse(data)) {
-      throw new Error("Invalid webhook response format");
+      throw new Error('Invalid webhook response format');
     }
 
     return data;
@@ -156,19 +152,19 @@ export class Dispatcher {
 
   /** 验证响应格式 */
   private isValidWebhookResponse(data: unknown): data is WebhookResponse {
-    if (typeof data !== "object" || data === null) {
+    if (typeof data !== 'object' || data === null) {
       return false;
     }
 
     const obj = data as Record<string, unknown>;
 
     // 必须有 status
-    if (typeof obj.status !== "string") {
+    if (typeof obj.status !== 'string') {
       return false;
     }
 
     // 如果有 response，必须是对象
-    if (obj.response !== undefined && typeof obj.response !== "object") {
+    if (obj.response !== undefined && typeof obj.response !== 'object') {
       return false;
     }
 
@@ -192,14 +188,13 @@ export class Dispatcher {
   async healthCheck(): Promise<boolean> {
     try {
       const response = await fetch(this.config.url, {
-        method: "HEAD",
+        method: 'HEAD',
         signal: AbortSignal.timeout(5000),
       });
       this.lastHealthCheckError = null;
       return response.ok || response.status === 405; // 405 Method Not Allowed 也算健康
     } catch (error) {
-      this.lastHealthCheckError =
-        error instanceof Error ? error.message : String(error);
+      this.lastHealthCheckError = error instanceof Error ? error.message : String(error);
       return false;
     }
   }
@@ -251,14 +246,14 @@ export class LoadBalancedDispatcher {
   /** 分发到任意可用的后端 */
   async dispatch(
     payload: WebhookPayload,
-    options?: DispatchOptions,
+    options?: DispatchOptions
   ): Promise<DispatchResult> {
     const backend = this.getHealthyBackend();
 
     if (!backend) {
       return {
         success: false,
-        error: "No healthy backend available",
+        error: 'No healthy backend available',
         attempts: 0,
         durationMs: 0,
       };

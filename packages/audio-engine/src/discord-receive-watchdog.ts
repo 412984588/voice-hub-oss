@@ -6,9 +6,9 @@
 
 /** 看门狗状态 */
 enum WatchdogState {
-  OK = "ok",
-  WARNING = "warning",
-  TIMEOUT = "timeout",
+  OK = 'ok',
+  WARNING = 'warning',
+  TIMEOUT = 'timeout',
 }
 
 /** 看门狗配置 */

@@ -66,7 +66,6 @@ voice.start
 ```
 
 可选参数：
-
 - `userId` - 用户标识符
 - `channelId` - Discord 语音频道 ID
 
@@ -79,7 +78,6 @@ voice.stop
 ```
 
 可选参数：
-
 - `sessionId` - 要停止的会话 ID（默认为当前会话）
 
 ### voice.status
@@ -91,11 +89,9 @@ voice.status
 ```
 
 可选参数：
-
 - `sessionId` - 会话 ID（默认为当前会话）
 
 返回示例：
-
 ```json
 {
   "state": "LISTENING",
@@ -112,11 +108,9 @@ voice.text "你好，世界"
 ```
 
 必需参数：
-
 - `text` - 要合成的文本
 
 可选参数：
-
 - `sessionId` - 会话 ID（默认为当前会话）
 
 ### voice.listen
@@ -129,11 +123,9 @@ voice.listen false  # 停止监听
 ```
 
 必需参数：
-
 - `enabled` - `true` 开始监听，`false` 停止监听
 
 可选参数：
-
 - `sessionId` - 会话 ID（默认为当前会话）
 
 ## 设置
@@ -182,23 +174,23 @@ voice.listen false  # 停止监听
 
 插件会发送以下通知：
 
-| 事件                | 消息                             | 类型  |
-| ------------------- | -------------------------------- | ----- |
-| `session.started`   | Voice session started            | info  |
-| `session.ended`     | Voice session ended              | info  |
-| `listening.started` | Now listening for voice input... | info  |
-| `listening.stopped` | Stopped listening                | info  |
-| `error`             | Voice error occurred             | error |
+| 事件 | 消息 | 类型 |
+|------|------|------|
+| `session.started` | Voice session started | info |
+| `session.ended` | Voice session ended | info |
+| `listening.started` | Now listening for voice input... | info |
+| `listening.stopped` | Stopped listening | info |
+| `error` | Voice error occurred | error |
 
 ## 编程接口
 
 ### TypeScript
 
 ```typescript
-import { VoiceHub } from "@voice-hub/claude-marketplace";
+import { VoiceHub } from '@voice-hub/claude-marketplace';
 
 const hub = new VoiceHub({
-  runtimeUrl: "http://localhost:8848",
+  runtimeUrl: 'http://localhost:8848',
 });
 
 // 创建会话
@@ -219,18 +211,18 @@ await hub.destroySession(sessionId);
 
 ### 环境变量
 
-| 变量                       | 说明               | 默认值                | 必需 |
-| -------------------------- | ------------------ | --------------------- | ---- |
-| `VOICE_PROVIDER`           | 语音提供商         | `local-mock`          | 否   |
-| `DISCORD_BOT_TOKEN`        | Discord 机器人令牌 | -                     | 是   |
-| `DISCORD_GUILD_ID`         | Discord 服务器 ID  | -                     | 是   |
-| `DISCORD_VOICE_CHANNEL_ID` | 默认语音频道 ID    | -                     | 否   |
-| `DOUBAO_REALTIME_WS_URL`   | 豆包 WebSocket URL | -                     | 否   |
-| `DOUBAO_APP_ID`            | 豆包应用 ID        | -                     | 否   |
-| `DOUBAO_ACCESS_TOKEN`      | 豆包访问令牌       | -                     | 否   |
-| `MEMORY_DB_PATH`           | SQLite 数据库路径  | `./data/voice-hub.db` | 否   |
-| `WEBHOOK_PORT`             | Webhook 端口       | `8848`                | 否   |
-| `WEBHOOK_SECRET`           | Webhook 签名密钥   | -                     | 是   |
+| 变量 | 说明 | 默认值 | 必需 |
+|------|------|--------|------|
+| `VOICE_PROVIDER` | 语音提供商 | `local-mock` | 否 |
+| `DISCORD_BOT_TOKEN` | Discord 机器人令牌 | - | 是 |
+| `DISCORD_GUILD_ID` | Discord 服务器 ID | - | 是 |
+| `DISCORD_VOICE_CHANNEL_ID` | 默认语音频道 ID | - | 否 |
+| `DOUBAO_REALTIME_WS_URL` | 豆包 WebSocket URL | - | 否 |
+| `DOUBAO_APP_ID` | 豆包应用 ID | - | 否 |
+| `DOUBAO_ACCESS_TOKEN` | 豆包访问令牌 | - | 否 |
+| `MEMORY_DB_PATH` | SQLite 数据库路径 | `./data/voice-hub.db` | 否 |
+| `WEBHOOK_PORT` | Webhook 端口 | `8848` | 否 |
+| `WEBHOOK_SECRET` | Webhook 签名密钥 | - | 是 |
 
 ## 测试
 
@@ -247,7 +239,6 @@ pnpm --filter @voice-hub/claude-marketplace test
 ### 插件无法加载
 
 确保：
-
 1. Voice Hub 运行时已启动
 2. 环境变量已正确配置
 3. `.env` 文件存在于项目根目录

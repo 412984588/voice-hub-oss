@@ -65,7 +65,7 @@ export interface TaskRun {
   /** 完成时间 */
   completedAt?: number;
   /** 状态 */
-  status: "pending" | "running" | "completed" | "failed";
+  status: 'pending' | 'running' | 'completed' | 'failed';
   /** 结果摘要 */
   resultSummary?: string;
   /** 错误信息 */
@@ -83,11 +83,11 @@ export interface PendingAnnouncement {
   /** 目标 Guild ID */
   targetGuildId: string;
   /** 通知类型 */
-  type: "task_completed" | "task_failed" | "info" | "error";
+  type: 'task_completed' | 'task_failed' | 'info' | 'error';
   /** 内容 */
   content: string;
   /** 优先级 */
-  priority: "immediate" | "normal" | "low";
+  priority: 'immediate' | 'normal' | 'low';
   /** 创建时间 */
   createdAt: number;
   /** 是否已处理 */

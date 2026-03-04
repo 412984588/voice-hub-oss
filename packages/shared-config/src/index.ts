@@ -5,9 +5,9 @@
  * 提供环境变量解析、配置验证、默认值
  */
 
-import { z } from "zod";
-import { configSchema, internalConfigSchema } from "./schema.js";
-import { CONSTANTS } from "./constants.js";
+import { z } from 'zod';
+import { configSchema, internalConfigSchema } from './schema.js';
+import { CONSTANTS } from './constants.js';
 
 export interface Config {
   // Discord
@@ -41,8 +41,8 @@ export interface Config {
   memoryBusyTimeout: number;
 
   // Logging
-  logLevel: "debug" | "info" | "warn" | "error";
-  logFormat: "json" | "pretty";
+  logLevel: 'debug' | 'info' | 'warn' | 'error';
+  logFormat: 'json' | 'pretty';
   logPretty: boolean;
 
   // Audio
@@ -58,7 +58,7 @@ export interface Config {
   sessionReconnectDelayMs: number;
 
   // Provider
-  voiceProvider: "disabled" | "local-mock" | "doubao";
+  voiceProvider: 'disabled' | 'local-mock' | 'doubao';
 }
 
 export { configSchema, CONSTANTS };
@@ -86,12 +86,12 @@ export function loadConfig(): Config {
     return parsed as Config;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      writeErrorLine("配置验证失败:");
+      writeErrorLine('配置验证失败:');
       for (const issue of error.issues) {
-        writeErrorLine(`  - ${issue.path.join(".")}: ${issue.message}`);
+        writeErrorLine(`  - ${issue.path.join('.')}: ${issue.message}`);
       }
     }
-    throw new Error("配置验证失败，请检查 .env 文件");
+    throw new Error('配置验证失败，请检查 .env 文件');
   }
 }
 
@@ -106,22 +106,22 @@ export function validateConfigForProvider(config: Config): {
 
   // 基础 Discord 配置
   if (!config.discordBotToken) {
-    errors.push("DISCORD_BOT_TOKEN 是必需的");
+    errors.push('DISCORD_BOT_TOKEN 是必需的');
   }
   if (!config.discordGuildId) {
-    errors.push("DISCORD_GUILD_ID 是必需的");
+    errors.push('DISCORD_GUILD_ID 是必需的');
   }
   if (!config.discordVoiceChannelId) {
-    errors.push("DISCORD_VOICE_CHANNEL_ID 是必需的");
+    errors.push('DISCORD_VOICE_CHANNEL_ID 是必需的');
   }
 
   // Provider 特定配置
-  if (config.voiceProvider === "doubao") {
+  if (config.voiceProvider === 'doubao') {
     if (!config.doubaoAppId) {
-      errors.push("DOUBAO_APP_ID 在使用 doubao provider 时是必需的");
+      errors.push('DOUBAO_APP_ID 在使用 doubao provider 时是必需的');
     }
     if (!config.doubaoAccessToken) {
-      errors.push("DOUBAO_ACCESS_TOKEN 在使用 doubao provider 时是必需的");
+      errors.push('DOUBAO_ACCESS_TOKEN 在使用 doubao provider 时是必需的');
     }
   }
 
@@ -131,5 +131,5 @@ export function validateConfigForProvider(config: Config): {
   };
 }
 
-export * from "./schema.js";
-export * from "./constants.js";
+export * from './schema.js';
+export * from './constants.js';

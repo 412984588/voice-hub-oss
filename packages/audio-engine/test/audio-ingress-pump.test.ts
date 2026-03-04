@@ -1,7 +1,7 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { AudioIngressPump } from "../src/audio-ingress-pump.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { AudioIngressPump } from '../src/audio-ingress-pump.js';
 
-describe("AudioIngressPump", () => {
+describe('AudioIngressPump', () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -10,7 +10,7 @@ describe("AudioIngressPump", () => {
     vi.useRealTimers();
   });
 
-  it("triggers timeout when watchdog is enabled and no packet arrives", () => {
+  it('triggers timeout when watchdog is enabled and no packet arrives', () => {
     const onFrame = vi.fn();
     const onTimeout = vi.fn();
     const pump = new AudioIngressPump(
@@ -26,7 +26,7 @@ describe("AudioIngressPump", () => {
         onFrame,
         onError: vi.fn(),
         onTimeout,
-      },
+      }
     );
 
     pump.start();
@@ -36,7 +36,7 @@ describe("AudioIngressPump", () => {
     expect(onTimeout).toHaveBeenCalledTimes(1);
   });
 
-  it("does not fire timeout immediately when receiving the first packet", () => {
+  it('does not fire timeout immediately when receiving the first packet', () => {
     const onTimeout = vi.fn();
     const pump = new AudioIngressPump(
       {
@@ -51,7 +51,7 @@ describe("AudioIngressPump", () => {
         onFrame: vi.fn(),
         onError: vi.fn(),
         onTimeout,
-      },
+      }
     );
 
     pump.start();
@@ -60,7 +60,7 @@ describe("AudioIngressPump", () => {
     expect(onTimeout).not.toHaveBeenCalled();
   });
 
-  it("builds audio frame from packet using exact buffer slice", () => {
+  it('builds audio frame from packet using exact buffer slice', () => {
     const onFrame = vi.fn();
     const pump = new AudioIngressPump(
       {
@@ -75,7 +75,7 @@ describe("AudioIngressPump", () => {
         onFrame,
         onError: vi.fn(),
         onTimeout: vi.fn(),
-      },
+      }
     );
 
     const source = Buffer.from([9, 9, 1, 0, 2, 0, 9, 9]);

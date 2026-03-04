@@ -4,7 +4,7 @@
  * 后端分发器类型定义
  */
 
-import type { WebhookPayload, WebhookResponse } from "@voice-hub/shared-types";
+import type { WebhookPayload, WebhookResponse } from '@voice-hub/shared-types';
 
 /** 分发器配置 */
 export interface DispatcherConfig {
@@ -53,11 +53,11 @@ export interface DispatchResult {
 /** 后端类型 */
 export enum BackendType {
   /** OpenClaw */
-  OPENCLAW = "openclaw",
+  OPENCLAW = 'openclaw',
   /** Claude Code */
-  CLAUDE_CODE = "claude-code",
+  CLAUDE_CODE = 'claude-code',
   /** 自定义 */
-  CUSTOM = "custom",
+  CUSTOM = 'custom',
 }
 
 /** 后端注册信息 */

@@ -67,9 +67,7 @@
                 "type": "string",
                 "description": "Session ID to destroy"
               },
-              "required": [
-                "sessionId"
-              ]
+              "required": ["sessionId"]
             }
           }
         },
@@ -82,9 +80,7 @@
                 "type": "string",
                 "description": "Session ID"
               },
-              "required": [
-                "sessionId"
-              ]
+              "required": ["sessionId"]
             }
           }
         },
@@ -97,9 +93,7 @@
                 "type": "string",
                 "description": "Session ID"
               },
-              "required": [
-                "sessionId"
-              ]
+              "required": ["sessionId"]
             }
           }
         },
@@ -112,9 +106,7 @@
                 "type": "string",
                 "description": "Session ID"
               },
-              "required": [
-                "sessionId"
-              ]
+              "required": ["sessionId"]
             }
           }
         }

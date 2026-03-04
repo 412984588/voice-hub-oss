@@ -18,9 +18,9 @@ export interface BaseEvent {
  * 音频事件
  */
 export interface AudioEvent extends BaseEvent {
-  type: "audio";
+  type: 'audio';
   /** 方向 */
-  direction: "ingress" | "egress";
+  direction: 'ingress' | 'egress';
   /** 数据长度 */
   dataLength: number;
 }
@@ -29,11 +29,11 @@ export interface AudioEvent extends BaseEvent {
  * 系统会话事件
  */
 export interface SystemSessionEvent extends BaseEvent {
-  type: "session";
+  type: 'session';
   /** 会话 ID */
   sessionId: string;
   /** 事件子类型 */
-  subType: "created" | "destroyed" | "state_changed";
+  subType: 'created' | 'destroyed' | 'state_changed';
   /** 额外数据 */
   data?: Record<string, unknown>;
 }
@@ -42,11 +42,11 @@ export interface SystemSessionEvent extends BaseEvent {
  * Provider 事件
  */
 export interface ProviderEvent extends BaseEvent {
-  type: "provider";
+  type: 'provider';
   /** Provider 类型 */
   provider: string;
   /** 事件子类型 */
-  subType: "connected" | "disconnected" | "error" | "tool_call";
+  subType: 'connected' | 'disconnected' | 'error' | 'tool_call';
   /** 额外数据 */
   data?: Record<string, unknown>;
 }
@@ -55,11 +55,11 @@ export interface ProviderEvent extends BaseEvent {
  * 后台任务事件
  */
 export interface BackendTaskEvent extends BaseEvent {
-  type: "backend_task";
+  type: 'backend_task';
   /** 任务 ID */
   taskId: string;
   /** 事件子类型 */
-  subType: "dispatched" | "completed" | "failed" | "timeout";
+  subType: 'dispatched' | 'completed' | 'failed' | 'timeout';
   /** 额外数据 */
   data?: Record<string, unknown>;
 }
@@ -77,12 +77,12 @@ export type VoiceHubEvent =
  * 事件监听器
  */
 export type EventListener<T extends VoiceHubEvent = VoiceHubEvent> = (
-  event: T,
+  event: T
 ) => void | Promise<void>;
 
 /**
  * 事件过滤器
  */
 export type EventFilter<T extends VoiceHubEvent = VoiceHubEvent> = (
-  event: T,
+  event: T
 ) => boolean;

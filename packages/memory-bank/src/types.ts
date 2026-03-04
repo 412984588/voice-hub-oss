@@ -4,30 +4,30 @@
  * 记忆存储类型定义
  */
 
-import type { SessionState, TurnMetadata } from "@voice-hub/shared-types";
+import type { SessionState, TurnMetadata } from '@voice-hub/shared-types';
 
 /** 记忆条目类型 */
 export enum MemoryType {
   /** 用户消息 */
-  USER = "user",
+  USER = 'user',
   /** 助手消息 */
-  ASSISTANT = "assistant",
+  ASSISTANT = 'assistant',
   /** 系统消息 */
-  SYSTEM = "system",
+  SYSTEM = 'system',
   /** 事件日志 */
-  EVENT = "event",
+  EVENT = 'event',
   /** 错误日志 */
-  ERROR = "error",
+  ERROR = 'error',
 }
 
 /** 记忆条目状态 */
 export enum MemoryStatus {
   /** 活跃 */
-  ACTIVE = "active",
+  ACTIVE = 'active',
   /** 已归档 */
-  ARCHIVED = "archived",
+  ARCHIVED = 'archived',
   /** 已删除 */
-  DELETED = "deleted",
+  DELETED = 'deleted',
 }
 
 /** 记忆条目 */
@@ -85,9 +85,9 @@ export interface QueryOptions {
   /** 偏移量 */
   offset?: number;
   /** 排序 */
-  orderBy?: "createdAt" | "startTime" | "updatedAt";
+  orderBy?: 'createdAt' | 'startTime' | 'updatedAt';
   /** 排序方向 */
-  order?: "ASC" | "DESC";
+  order?: 'ASC' | 'DESC';
   /** 类型过滤 */
   types?: MemoryType[];
   /** 状态过滤 */
@@ -109,7 +109,7 @@ export interface MemoryBankConfig {
   /** 是否启用外键约束 */
   foreignKeys: boolean;
   /** 日志级别 */
-  logLevel?: "debug" | "info" | "warn" | "error";
+  logLevel?: 'debug' | 'info' | 'warn' | 'error';
 }
 
 /** 统计信息 */

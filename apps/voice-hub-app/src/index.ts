@@ -4,16 +4,13 @@
  * Voice Hub 主应用入口
  */
 
-import {
-  loadConfig,
-  validateConfigForProvider,
-} from "@voice-hub/shared-config";
-import { createProvider } from "@voice-hub/provider";
-import { DatabaseManager, MemoryStore } from "@voice-hub/memory-bank";
-import { Dispatcher } from "@voice-hub/backend-dispatcher";
-import { VoiceRuntime } from "@voice-hub/core-runtime";
-import { VoiceHubServer } from "./server.js";
-import { DiscordBot } from "./discord-bot.js";
+import { loadConfig, validateConfigForProvider } from '@voice-hub/shared-config';
+import { createProvider } from '@voice-hub/provider';
+import { DatabaseManager, MemoryStore } from '@voice-hub/memory-bank';
+import { Dispatcher } from '@voice-hub/backend-dispatcher';
+import { VoiceRuntime } from '@voice-hub/core-runtime';
+import { VoiceHubServer } from './server.js';
+import { DiscordBot } from './discord-bot.js';
 
 /** Voice Hub 应用类 */
 export class VoiceHubApp {
@@ -30,7 +27,7 @@ export class VoiceHubApp {
     // 验证配置
     const validation = validateConfigForProvider(this.config);
     if (!validation.valid) {
-      throw new Error(`Configuration error:\n${validation.errors.join("\n")}`);
+      throw new Error(`Configuration error:\n${validation.errors.join('\n')}`);
     }
 
     // 初始化数据库
@@ -58,7 +55,7 @@ export class VoiceHubApp {
     }
 
     // 创建提供商
-    const provider = createProvider(this.config, "default-session");
+    const provider = createProvider(this.config, 'default-session');
 
     // 创建运行时
     this.runtime = new VoiceRuntime({
@@ -78,10 +75,10 @@ export class VoiceHubApp {
   /** 启动应用 */
   async start(): Promise<void> {
     if (this.isRunning) {
-      throw new Error("Voice Hub is already running");
+      throw new Error('Voice Hub is already running');
     }
 
-    this.logInfo("Starting Voice Hub...");
+    this.logInfo('Starting Voice Hub...');
     let runtimeStarted = false;
     let discordStarted = false;
     let serverStarted = false;
@@ -97,7 +94,7 @@ export class VoiceHubApp {
       if (this.discordBot) {
         await this.discordBot.start();
         discordStarted = true;
-        this.logInfo("Discord bot connected");
+        this.logInfo('Discord bot connected');
       }
 
       // 启动 Web 服务器
@@ -108,19 +105,19 @@ export class VoiceHubApp {
       }
 
       this.isRunning = true;
-      this.logInfo("Voice Hub is running");
+      this.logInfo('Voice Hub is running');
     } catch (error) {
       // 启动失败时回滚已经启动的组件
       if (serverStarted && this.server) {
-        await this.stopSafely(() => this.server!.stop(), "web server");
+        await this.stopSafely(() => this.server!.stop(), 'web server');
       }
 
       if (discordStarted && this.discordBot) {
-        await this.stopSafely(() => this.discordBot!.stop(), "discord bot");
+        await this.stopSafely(() => this.discordBot!.stop(), 'discord bot');
       }
 
       if (runtimeStarted && this.runtime) {
-        await this.stopSafely(() => this.runtime!.stop(), "runtime");
+        await this.stopSafely(() => this.runtime!.stop(), 'runtime');
       }
 
       this.isRunning = false;
@@ -134,7 +131,7 @@ export class VoiceHubApp {
       return;
     }
 
-    this.logInfo("Stopping Voice Hub...");
+    this.logInfo('Stopping Voice Hub...');
 
     // 停止 Web 服务器
     if (this.server) {
@@ -155,7 +152,7 @@ export class VoiceHubApp {
     this.database.close();
 
     this.isRunning = false;
-    this.logInfo("Voice Hub stopped");
+    this.logInfo('Voice Hub stopped');
   }
 
   /** 获取运行状态 */
@@ -175,18 +172,12 @@ export class VoiceHubApp {
     process.stdout.write(`[voice-hub-app] ${message}\n`);
   }
 
-  private async stopSafely(
-    stopFn: () => Promise<void>,
-    component: string,
-  ): Promise<void> {
+  private async stopSafely(stopFn: () => Promise<void>, component: string): Promise<void> {
     try {
       await stopFn();
     } catch (error) {
-      const detail =
-        error instanceof Error ? (error.stack ?? error.message) : String(error);
-      process.stderr.write(
-        `[voice-hub-app] Failed to rollback ${component}: ${detail}\n`,
-      );
+      const detail = error instanceof Error ? (error.stack ?? error.message) : String(error);
+      process.stderr.write(`[voice-hub-app] Failed to rollback ${component}: ${detail}\n`);
     }
   }
 }

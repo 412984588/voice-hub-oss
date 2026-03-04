@@ -51,17 +51,3 @@ openclaw-state.json
 
 # Claude Code
 .claude-plugin/
-
-# Turbo
-.turbo/
-
-# Package manager stores
-.pnpm-store/
-
-# Temporary files
-*.tmp
-.cache/
-
-# Local configuration (can override project defaults)
-.env.local
-.env.*.local

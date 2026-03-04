@@ -4,11 +4,11 @@
  * SQLite 数据库管理
  */
 
-import Database from "better-sqlite3";
-import { existsSync, mkdirSync } from "node:fs";
-import { dirname } from "node:path";
-import { inspect } from "node:util";
-import type { MemoryBankConfig } from "./types.js";
+import Database from 'better-sqlite3';
+import { existsSync, mkdirSync } from 'node:fs';
+import { dirname } from 'node:path';
+import { inspect } from 'node:util';
+import type { MemoryBankConfig } from './types.js';
 
 /** SQL 初始化脚本 */
 const SCHEMA = `
@@ -76,7 +76,7 @@ export class DatabaseManager {
   /** 获取数据库连接 */
   getConnection(): Database.Database {
     if (!this.db) {
-      throw new Error("Database not initialized. Call init() first.");
+      throw new Error('Database not initialized. Call init() first.');
     }
     return this.db;
   }
@@ -95,10 +95,9 @@ export class DatabaseManager {
 
     // 创建数据库连接
     this.db = new Database(this.config.dbPath, {
-      verbose:
-        this.config.logLevel === "debug"
-          ? (...args: unknown[]) => this.logSqliteDebug(args)
-          : undefined,
+      verbose: this.config.logLevel === 'debug'
+        ? ((...args: unknown[]) => this.logSqliteDebug(args))
+        : undefined,
     });
 
     // 配置连接
@@ -130,7 +129,7 @@ export class DatabaseManager {
 
     // 启用 WAL 模式
     if (this.config.walEnabled) {
-      this.db.pragma("journal_mode = WAL");
+      this.db.pragma('journal_mode = WAL');
     }
 
     // 设置忙碌超时
@@ -138,28 +137,28 @@ export class DatabaseManager {
 
     // 启用外键约束
     if (this.config.foreignKeys) {
-      this.db.pragma("foreign_keys = ON");
+      this.db.pragma('foreign_keys = ON');
     }
 
     // 优化设置
-    this.db.pragma("synchronous = NORMAL");
-    this.db.pragma("cache_size = -16000"); // 16MB cache
-    this.db.pragma("temp_store = MEMORY");
+    this.db.pragma('synchronous = NORMAL');
+    this.db.pragma('cache_size = -16000'); // 16MB cache
+    this.db.pragma('temp_store = MEMORY');
   }
 
   /** 开始事务 */
   beginTransaction(): void {
-    this.getConnection().exec("BEGIN IMMEDIATE TRANSACTION");
+    this.getConnection().exec('BEGIN IMMEDIATE TRANSACTION');
   }
 
   /** 提交事务 */
   commit(): void {
-    this.getConnection().exec("COMMIT");
+    this.getConnection().exec('COMMIT');
   }
 
   /** 回滚事务 */
   rollback(): void {
-    this.getConnection().exec("ROLLBACK");
+    this.getConnection().exec('ROLLBACK');
   }
 
   /** 执行批量操作（在事务中） */
@@ -170,7 +169,7 @@ export class DatabaseManager {
   /** 检查表是否存在 */
   tableExists(tableName: string): boolean {
     const stmt = this.getConnection().prepare(
-      'SELECT count(*) as count FROM sqlite_master WHERE type="table" AND name=?',
+      'SELECT count(*) as count FROM sqlite_master WHERE type="table" AND name=?'
     );
     const result = stmt.get(tableName) as { count: number } | undefined;
     return (result?.count ?? 0) > 0;
@@ -186,22 +185,20 @@ export class DatabaseManager {
     const db = this.getConnection();
 
     return {
-      walMode: db.pragma("journal_mode", { simple: true }) === "wal",
-      pageSize: db.pragma("page_size", { simple: true }) as number,
-      pageCount: db.pragma("page_count", { simple: true }) as number,
-      cacheSize: db.pragma("cache_size", { simple: true }) as number,
+      walMode: db.pragma('journal_mode', { simple: true }) === 'wal',
+      pageSize: db.pragma('page_size', { simple: true }) as number,
+      pageCount: db.pragma('page_count', { simple: true }) as number,
+      cacheSize: db.pragma('cache_size', { simple: true }) as number,
     };
   }
 
   private logSqliteDebug(args: unknown[]): void {
-    const message = args
-      .map((value) => {
-        if (typeof value === "string") {
-          return value;
-        }
-        return inspect(value, { depth: 3, breakLength: 120 });
-      })
-      .join(" ");
+    const message = args.map((value) => {
+      if (typeof value === 'string') {
+        return value;
+      }
+      return inspect(value, { depth: 3, breakLength: 120 });
+    }).join(' ');
     process.stdout.write(`[memory-bank][sqlite] ${message}\n`);
   }
 }

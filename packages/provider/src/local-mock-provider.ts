@@ -4,16 +4,16 @@
  * 本地 Mock 提供商 - 用于测试和开发
  */
 
-import { randomUUID } from "node:crypto";
-import type { AudioFrame, ProviderEvent } from "@voice-hub/shared-types";
-import type { ProviderConfig } from "./types.js";
-import { BaseProvider } from "./base-provider.js";
-import { ProviderState } from "./types.js";
+import { randomUUID } from 'node:crypto';
+import type { AudioFrame, ProviderEvent } from '@voice-hub/shared-types';
+import type { ProviderConfig } from './types.js';
+import { BaseProvider } from './base-provider.js';
+import { ProviderState } from './types.js';
 
 /** 本地 Mock 提供商配置 */
 export interface LocalMockConfig extends ProviderConfig {
   /** 模拟音频生成模式 */
-  mode?: "silence" | "sine" | "noise";
+  mode?: 'silence' | 'sine' | 'noise';
   /** 延迟（毫秒） */
   latencyMs?: number;
   /** 模拟错误率（0-1） */
@@ -25,7 +25,7 @@ export class LocalMockProvider extends BaseProvider {
   readonly capabilities = {
     fullDuplex: true,
     interruption: true,
-    codecs: ["pcm"] as const,
+    codecs: ['pcm'] as const,
     sampleRates: [8000, 12000, 16000, 24000, 48000],
   };
 
@@ -36,7 +36,7 @@ export class LocalMockProvider extends BaseProvider {
   constructor(config: LocalMockConfig) {
     super(config);
     this.config = {
-      mode: "silence",
+      mode: 'silence',
       latencyMs: 100,
       errorRate: 0,
       ...config,
@@ -55,11 +55,11 @@ export class LocalMockProvider extends BaseProvider {
     this._stats.connectedAt = Date.now();
 
     this.emitEvent({
-      type: "provider",
+      type: 'provider',
       timestamp: Date.now(),
       eventId: randomUUID(),
-      provider: "local-mock",
-      subType: "connected",
+      provider: 'local-mock',
+      subType: 'connected',
     });
   }
 
@@ -72,11 +72,11 @@ export class LocalMockProvider extends BaseProvider {
     this.setState(ProviderState.CLOSED);
 
     this.emitEvent({
-      type: "provider",
+      type: 'provider',
       timestamp: Date.now(),
       eventId: randomUUID(),
-      provider: "local-mock",
-      subType: "disconnected",
+      provider: 'local-mock',
+      subType: 'disconnected',
     });
   }
 
@@ -113,7 +113,7 @@ export class LocalMockProvider extends BaseProvider {
     // 模拟随机错误
     if (Math.random() < (this.config.errorRate || 0)) {
       this.incrementErrors();
-      throw new Error("Mock send error");
+      throw new Error('Mock send error');
     }
 
     // 模拟发送延迟
@@ -131,13 +131,13 @@ export class LocalMockProvider extends BaseProvider {
     const data = new Int16Array(samplesPerFrame * channels);
 
     switch (this.config.mode) {
-      case "sine":
+      case 'sine':
         this.generateSineWave(data, this.frameCount, sampleRate);
         break;
-      case "noise":
+      case 'noise':
         this.generateNoise(data);
         break;
-      case "silence":
+      case 'silence':
       default:
         // 静音 - 全零
         break;
@@ -156,11 +156,7 @@ export class LocalMockProvider extends BaseProvider {
     this.emitAudio(frame);
   }
 
-  private generateSineWave(
-    data: Int16Array,
-    frameCount: number,
-    sampleRate: number,
-  ): void {
+  private generateSineWave(data: Int16Array, frameCount: number, sampleRate: number): void {
     const frequency = 440; // A4
     const amplitude = 0.3 * 32768; // 30% of max
 

@@ -2,46 +2,44 @@
  * Zod 配置验证 Schema
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 
 const DEFAULT_CORS_ALLOWED_ORIGINS = [
-  "http://localhost:3000",
-  "http://127.0.0.1:3000",
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
 ] as const;
 
-const TRUE_VALUES = new Set(["1", "true", "yes", "on"]);
-const FALSE_VALUES = new Set(["0", "false", "no", "off", ""]);
+const TRUE_VALUES = new Set(['1', 'true', 'yes', 'on']);
+const FALSE_VALUES = new Set(['0', 'false', 'no', 'off', '']);
 
 const envBoolean = (defaultValue: boolean) =>
-  z
-    .preprocess((value) => {
-      if (typeof value === "boolean") {
-        return value;
-      }
-
-      if (typeof value === "number") {
-        if (value === 1) {
-          return true;
-        }
-        if (value === 0) {
-          return false;
-        }
-        return value;
-      }
-
-      if (typeof value === "string") {
-        const normalized = value.trim().toLowerCase();
-        if (TRUE_VALUES.has(normalized)) {
-          return true;
-        }
-        if (FALSE_VALUES.has(normalized)) {
-          return false;
-        }
-      }
-
+  z.preprocess((value) => {
+    if (typeof value === 'boolean') {
       return value;
-    }, z.boolean())
-    .default(defaultValue);
+    }
+
+    if (typeof value === 'number') {
+      if (value === 1) {
+        return true;
+      }
+      if (value === 0) {
+        return false;
+      }
+      return value;
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (TRUE_VALUES.has(normalized)) {
+        return true;
+      }
+      if (FALSE_VALUES.has(normalized)) {
+        return false;
+      }
+    }
+
+    return value;
+  }, z.boolean()).default(defaultValue);
 
 /**
  * 环境变量 Schema
@@ -49,12 +47,10 @@ const envBoolean = (defaultValue: boolean) =>
  */
 export const configSchema = z.object({
   // Discord Configuration
-  DISCORD_BOT_TOKEN: z.string().min(1, "DISCORD_BOT_TOKEN 不能为空"),
-  DISCORD_GUILD_ID: z.string().min(1, "DISCORD_GUILD_ID 不能为空"),
-  DISCORD_VOICE_CHANNEL_ID: z
-    .string()
-    .min(1, "DISCORD_VOICE_CHANNEL_ID 不能为空"),
-  DISCORD_CLIENT_ID: z.string().min(1, "DISCORD_CLIENT_ID 不能为空").optional(),
+  DISCORD_BOT_TOKEN: z.string().min(1, 'DISCORD_BOT_TOKEN 不能为空'),
+  DISCORD_GUILD_ID: z.string().min(1, 'DISCORD_GUILD_ID 不能为空'),
+  DISCORD_VOICE_CHANNEL_ID: z.string().min(1, 'DISCORD_VOICE_CHANNEL_ID 不能为空'),
+  DISCORD_CLIENT_ID: z.string().min(1, 'DISCORD_CLIENT_ID 不能为空').optional(),
 
   // Doubao Realtime Voice
   DOUBAO_REALTIME_WS_URL: z.string().url().optional(),
@@ -68,23 +64,21 @@ export const configSchema = z.object({
 
   // Webhook Server
   WEBHOOK_PORT: z.coerce.number().int().positive().max(65535).default(8911),
-  WEBHOOK_SECRET: z.string().min(16).default("change-me-in-production"),
-  WEBHOOK_PATH: z.string().default("/webhook/callback"),
+  WEBHOOK_SECRET: z.string().min(16).default('change-me-in-production'),
+  WEBHOOK_PATH: z.string().default('/webhook/callback'),
   VOICE_HUB_API_KEY: z.string().trim().min(1).optional(),
   WEBHOOK_LEGACY_SECRET_HEADER: envBoolean(false),
   WEBHOOK_SHADOW_MODE: envBoolean(false),
-  CORS_ALLOWED_ORIGINS: z
-    .string()
-    .default(DEFAULT_CORS_ALLOWED_ORIGINS.join(",")),
+  CORS_ALLOWED_ORIGINS: z.string().default(DEFAULT_CORS_ALLOWED_ORIGINS.join(',')),
 
   // Memory Bank
-  MEMORY_DB_PATH: z.string().default("./data/memory_bank.db"),
+  MEMORY_DB_PATH: z.string().default('./data/memory_bank.db'),
   MEMORY_WAL_ENABLED: envBoolean(true),
   MEMORY_BUSY_TIMEOUT: z.coerce.number().int().positive().default(5000),
 
   // Logging
-  LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
-  LOG_FORMAT: z.enum(["json", "pretty"]).default("json"),
+  LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+  LOG_FORMAT: z.enum(['json', 'pretty']).default('json'),
   LOG_PRETTY: envBoolean(false),
 
   // Audio Configuration
@@ -96,18 +90,11 @@ export const configSchema = z.object({
 
   // Session Management
   SESSION_TIMEOUT_MS: z.coerce.number().int().positive().default(300000),
-  SESSION_MAX_RECONNECT_ATTEMPTS: z.coerce
-    .number()
-    .int()
-    .min(0)
-    .max(20)
-    .default(5),
+  SESSION_MAX_RECONNECT_ATTEMPTS: z.coerce.number().int().min(0).max(20).default(5),
   SESSION_RECONNECT_DELAY_MS: z.coerce.number().int().positive().default(2000),
 
   // Provider Selection
-  VOICE_PROVIDER: z
-    .enum(["disabled", "local-mock", "doubao"])
-    .default("disabled"),
+  VOICE_PROVIDER: z.enum(['disabled', 'local-mock', 'doubao']).default('disabled'),
 });
 
 /**
@@ -117,7 +104,7 @@ export const internalConfigSchema = configSchema.transform((raw) => ({
   discordBotToken: raw.DISCORD_BOT_TOKEN,
   discordGuildId: raw.DISCORD_GUILD_ID,
   discordVoiceChannelId: raw.DISCORD_VOICE_CHANNEL_ID,
-  discordClientId: raw.DISCORD_CLIENT_ID || "",
+  discordClientId: raw.DISCORD_CLIENT_ID || '',
 
   doubaoRealtimeWsUrl: raw.DOUBAO_REALTIME_WS_URL,
   doubaoAppId: raw.DOUBAO_APP_ID,
@@ -133,7 +120,8 @@ export const internalConfigSchema = configSchema.transform((raw) => ({
   voiceHubApiKey: raw.VOICE_HUB_API_KEY,
   webhookLegacySecretHeader: raw.WEBHOOK_LEGACY_SECRET_HEADER,
   webhookShadowMode: raw.WEBHOOK_SHADOW_MODE,
-  corsAllowedOrigins: raw.CORS_ALLOWED_ORIGINS.split(",")
+  corsAllowedOrigins: raw.CORS_ALLOWED_ORIGINS
+    .split(',')
     .map((origin) => origin.trim())
     .filter((origin) => origin.length > 0),
 

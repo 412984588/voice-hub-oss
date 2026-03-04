@@ -7,25 +7,25 @@
  */
 export enum SessionState {
   /** 未初始化 */
-  IDLE = "idle",
+  IDLE = 'idle',
   /** 连接中 */
-  CONNECTING = "connecting",
+  CONNECTING = 'connecting',
   /** 已连接 */
-  CONNECTED = "connected",
+  CONNECTED = 'connected',
   /** 监听中 */
-  LISTENING = "listening",
+  LISTENING = 'listening',
   /** 处理中 */
-  PROCESSING = "processing",
+  PROCESSING = 'processing',
   /** 回应中 */
-  RESPONDING = "responding",
+  RESPONDING = 'responding',
   /** 语音激活 */
-  SPEAKING = "speaking",
+  SPEAKING = 'speaking',
   /** 断连中 */
-  DISCONNECTING = "disconnecting",
+  DISCONNECTING = 'disconnecting',
   /** 已断开 */
-  DISCONNECTED = "disconnected",
+  DISCONNECTED = 'disconnected',
   /** 错误 */
-  ERROR = "error",
+  ERROR = 'error',
 }
 
 /**
@@ -68,13 +68,13 @@ export interface SessionContext {
  * 会话事件
  */
 export type SessionEvent =
-  | { type: "state_changed"; from: SessionState; to: SessionState }
-  | { type: "audio_received" }
-  | { type: "audio_sent" }
-  | { type: "speaking_started"; userId: string }
-  | { type: "speaking_stopped"; userId: string }
-  | { type: "error"; error: Error }
-  | { type: "disconnected"; reason: string };
+  | { type: 'state_changed'; from: SessionState; to: SessionState }
+  | { type: 'audio_received' }
+  | { type: 'audio_sent' }
+  | { type: 'speaking_started'; userId: string }
+  | { type: 'speaking_stopped'; userId: string }
+  | { type: 'error'; error: Error }
+  | { type: 'disconnected'; reason: string };
 
 /**
  * 会话配置

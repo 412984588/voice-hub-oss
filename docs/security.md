@@ -18,7 +18,6 @@ pnpm secret-scan
 ```
 
 扫描器会检查以下模式：
-
 - Discord Bot Token
 - API Key
 - Secret/Password
@@ -40,7 +39,6 @@ pnpm secret-scan
 ### 时间戳验证
 
 Webhook 请求包含时间戳，服务器会检查：
-
 - 时间戳与服务器时间差不超过 5 分钟
 - 防止重放攻击
 
@@ -65,7 +63,6 @@ Memory Bank 使用 SQLite WAL (Write-Ahead Logging) 模式：
 ### 权限最小化
 
 只请求必要的 Discord 权限：
-
 - `Connect`: 连接语音频道
 - `Speak`: 在语音频道中发言
 - `applications.commands`: 使用斜杠命令
@@ -96,11 +93,11 @@ CORS_ALLOWED_ORIGINS=https://your-domain.com,https://admin.your-domain.com
 建议在生产环境添加速率限制：
 
 ```typescript
-import rateLimit from "@fastify/rate-limit";
+import rateLimit from '@fastify/rate-limit';
 
 fastify.register(rateLimit, {
   max: 100, // 每个 IP 每 15 分钟最多 100 次请求
-  timeWindow: "15 minutes",
+  timeWindow: '15 minutes',
 });
 ```
 
@@ -109,7 +106,6 @@ fastify.register(rateLimit, {
 ### 敏感信息脱敏
 
 日志系统会自动脱敏以下关键字段：
-
 - `token`
 - `secret`
 - `password`

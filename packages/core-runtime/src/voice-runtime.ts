@@ -4,18 +4,18 @@
  * 语音运行时 - 整合所有组件的核心运行时
  */
 
-import type { Config } from "@voice-hub/shared-config";
+import type { Config } from '@voice-hub/shared-config';
+import type { AudioFrame, ProviderEvent, WebhookPayload } from '@voice-hub/shared-types';
+import { SessionState } from '@voice-hub/shared-types';
+import type { IAudioProvider } from '@voice-hub/provider';
+import type { MemoryStore } from '@voice-hub/memory-bank';
+import type { Dispatcher } from '@voice-hub/backend-dispatcher';
 import type {
-  AudioFrame,
-  ProviderEvent,
-  WebhookPayload,
-} from "@voice-hub/shared-types";
-import { SessionState } from "@voice-hub/shared-types";
-import type { IAudioProvider } from "@voice-hub/provider";
-import type { MemoryStore } from "@voice-hub/memory-bank";
-import type { Dispatcher } from "@voice-hub/backend-dispatcher";
-import type { RuntimeConfig, RuntimeEvent, SessionContext } from "./types.js";
-import { SessionManager } from "./session-manager.js";
+  RuntimeConfig,
+  RuntimeEvent,
+  SessionContext,
+} from './types.js';
+import { SessionManager } from './session-manager.js';
 
 /** 运行时选项 */
 export interface VoiceRuntimeOptions {
@@ -52,7 +52,7 @@ export class VoiceRuntime {
       maxReconnectAttempts: this.config.sessionMaxReconnectAttempts,
       reconnectDelayMs: this.config.sessionReconnectDelayMs,
       autoSaveAudio: false,
-      audioSaveDir: "./audio",
+      audioSaveDir: './audio',
       enableMemoryStore: !!this.memoryStore,
       enableBackendDispatch: !!this.dispatcher,
     };
@@ -60,7 +60,7 @@ export class VoiceRuntime {
     this.sessionManager = new SessionManager(
       this.runtimeConfig,
       this.memoryStore || undefined,
-      this.dispatcher || undefined,
+      this.dispatcher || undefined
     );
   }
 
@@ -72,13 +72,13 @@ export class VoiceRuntime {
 
     // 连接提供商
     if (this.provider) {
-      this.provider.on("audio", this.providerAudioListener);
-      this.provider.on("provider", this.providerEventListener);
+      this.provider.on('audio', this.providerAudioListener);
+      this.provider.on('provider', this.providerEventListener);
       await this.provider.connect();
     }
 
     this.isRunning = true;
-    this.emit("started");
+    this.emit('started');
   }
 
   /** 停止运行时 */
@@ -89,8 +89,8 @@ export class VoiceRuntime {
 
     // 断开提供商
     if (this.provider) {
-      this.provider.off("audio", this.providerAudioListener);
-      this.provider.off("provider", this.providerEventListener);
+      this.provider.off('audio', this.providerAudioListener);
+      this.provider.off('provider', this.providerEventListener);
       await this.provider.disconnect();
     }
 
@@ -98,19 +98,16 @@ export class VoiceRuntime {
     await this.sessionManager.destroyAllSessions();
 
     this.isRunning = false;
-    this.emit("stopped");
+    this.emit('stopped');
   }
 
   /** 创建新会话 */
   async createSession(userId?: string, channelId?: string): Promise<string> {
-    const sessionId = await this.sessionManager.createSession(
-      userId,
-      channelId,
-    );
+    const sessionId = await this.sessionManager.createSession(userId, channelId);
     this.sessionManager.setSessionTimeout(sessionId);
 
-    this.emit("session_created", {
-      type: "session_created",
+    this.emit('session_created', {
+      type: 'session_created',
       sessionId,
       timestamp: Date.now(),
       data: { userId, channelId },
@@ -123,8 +120,8 @@ export class VoiceRuntime {
   async destroySession(sessionId: string): Promise<void> {
     await this.sessionManager.destroySession(sessionId);
 
-    this.emit("session_destroyed", {
-      type: "session_destroyed",
+    this.emit('session_destroyed', {
+      type: 'session_destroyed',
       sessionId,
       timestamp: Date.now(),
     } as RuntimeEvent);
@@ -133,7 +130,7 @@ export class VoiceRuntime {
   /** 发送音频帧到提供商 */
   async sendAudio(sessionId: string, frame: AudioFrame): Promise<void> {
     if (!this.provider) {
-      throw new Error("No provider available");
+      throw new Error('No provider available');
     }
 
     const stateMachine = this.sessionManager.getStateMachine(sessionId);
@@ -148,8 +145,8 @@ export class VoiceRuntime {
 
     await this.provider.sendFrame(frame);
 
-    this.emit("audio_sent", {
-      type: "audio_sent",
+    this.emit('audio_sent', {
+      type: 'audio_sent',
       sessionId,
       timestamp: Date.now(),
       data: { frameSize: frame.data.length },
@@ -163,12 +160,10 @@ export class VoiceRuntime {
       throw new Error(`Session not found: ${sessionId}`);
     }
 
-    const transitioned = await stateMachine.transitionTo(
-      SessionState.LISTENING,
-    );
+    const transitioned = await stateMachine.transitionTo(SessionState.LISTENING);
     if (!transitioned) {
       throw new Error(
-        `Invalid state transition: ${stateMachine.currentState} -> ${SessionState.LISTENING}`,
+        `Invalid state transition: ${stateMachine.currentState} -> ${SessionState.LISTENING}`
       );
     }
 
@@ -201,7 +196,7 @@ export class VoiceRuntime {
     const transitioned = await stateMachine.transitionTo(SessionState.IDLE);
     if (!transitioned) {
       throw new Error(
-        `Invalid state transition: ${stateMachine.currentState} -> ${SessionState.IDLE}`,
+        `Invalid state transition: ${stateMachine.currentState} -> ${SessionState.IDLE}`
       );
     }
 
@@ -217,9 +212,9 @@ export class VoiceRuntime {
     const result = await this.dispatcher.dispatch(payload);
 
     if (!result.success) {
-      this.emit("error", {
-        type: "error",
-        sessionId: payload.sessionId || "",
+      this.emit('error', {
+        type: 'error',
+        sessionId: payload.sessionId || '',
         timestamp: Date.now(),
       } as RuntimeEvent);
     }
@@ -266,8 +261,8 @@ export class VoiceRuntime {
     });
 
     if (activeSession) {
-      this.emit("audio_received", {
-        type: "audio_received",
+      this.emit('audio_received', {
+        type: 'audio_received',
         sessionId: activeSession.sessionId,
         timestamp: Date.now(),
         data: { frame },
@@ -276,14 +271,14 @@ export class VoiceRuntime {
   }
 
   private handleProviderEvent(event: ProviderEvent): void {
-    if (event.subType === "connected") {
-      this.emit("ready");
+    if (event.subType === 'connected') {
+      this.emit('ready');
       return;
     }
 
-    if (event.subType === "error") {
-      this.emit("error", {
-        type: "error",
+    if (event.subType === 'error') {
+      this.emit('error', {
+        type: 'error',
         timestamp: Date.now(),
         data: event.data,
       } as RuntimeEvent);
@@ -292,8 +287,7 @@ export class VoiceRuntime {
 
   // ========== EventEmitter 风格的 emit/on ==========
 
-  private listeners: Map<string, Array<(event: RuntimeEvent) => void>> =
-    new Map();
+  private listeners: Map<string, Array<(event: RuntimeEvent) => void>> = new Map();
 
   on(event: string, listener: (event: RuntimeEvent) => void): void {
     if (!this.listeners.has(event)) {
@@ -317,12 +311,7 @@ export class VoiceRuntime {
     if (listeners) {
       for (const listener of listeners) {
         try {
-          listener(
-            data || {
-              type: event as RuntimeEvent["type"],
-              timestamp: Date.now(),
-            },
-          );
+          listener(data || { type: event as RuntimeEvent['type'], timestamp: Date.now() });
         } catch (error) {
           this.logListenerError(event, error);
         }
@@ -331,10 +320,9 @@ export class VoiceRuntime {
   }
 
   private logListenerError(event: string, error: unknown): void {
-    const detail =
-      error instanceof Error ? (error.stack ?? error.message) : String(error);
-    process.stderr.write(
-      `[voice-runtime] Listener error for event "${event}": ${detail}\n`,
-    );
+    const detail = error instanceof Error
+      ? (error.stack ?? error.message)
+      : String(error);
+    process.stderr.write(`[voice-runtime] Listener error for event "${event}": ${detail}\n`);
   }
 }

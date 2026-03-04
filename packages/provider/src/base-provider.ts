@@ -4,12 +4,12 @@
  * 音频提供商基类
  */
 
-import { EventEmitter } from "eventemitter3";
+import { EventEmitter } from 'eventemitter3';
 import type {
   AudioFrame,
   ProviderEvent,
   ProviderError,
-} from "@voice-hub/shared-types";
+} from '@voice-hub/shared-types';
 import type {
   IAudioProvider,
   ProviderCapabilities,
@@ -17,13 +17,10 @@ import type {
   ProviderStats,
   PushAudioCallback,
   EventListener,
-} from "./types.js";
-import { ProviderState } from "./types.js";
+} from './types.js';
+import { ProviderState } from './types.js';
 
-export abstract class BaseProvider
-  extends EventEmitter
-  implements IAudioProvider
-{
+export abstract class BaseProvider extends EventEmitter implements IAudioProvider {
   protected _state: ProviderState = ProviderState.IDLE;
   protected _stats: ProviderStats = {
     connectedAt: null,
@@ -62,13 +59,10 @@ export abstract class BaseProvider
     this._audioCallbacks.add(callback);
   }
 
-  on(event: "audio", listener: PushAudioCallback): this;
-  on(
-    event: "provider" | "connected" | "disconnected" | "ready" | "error",
-    listener: EventListener,
-  ): this;
+  on(event: 'audio', listener: PushAudioCallback): this;
+  on(event: 'provider' | 'connected' | 'disconnected' | 'ready' | 'error', listener: EventListener): this;
   on(event: string, listener: EventListener | PushAudioCallback): this {
-    if (event === "audio") {
+    if (event === 'audio') {
       this._audioCallbacks.add(listener as PushAudioCallback);
     } else {
       if (!this._eventListeners.has(event)) {
@@ -79,11 +73,8 @@ export abstract class BaseProvider
     return this;
   }
 
-  off(
-    event: string | symbol,
-    listener: EventListener | PushAudioCallback,
-  ): this {
-    if (event === "audio") {
+  off(event: string | symbol, listener: EventListener | PushAudioCallback): this {
+    if (event === 'audio') {
       this._audioCallbacks.delete(listener as PushAudioCallback);
     } else {
       const listeners = this._eventListeners.get(String(event));
@@ -105,7 +96,7 @@ export abstract class BaseProvider
   protected setState(state: ProviderState): void {
     const oldState = this._state;
     this._state = state;
-    this.emit("stateChanged", { oldState, newState: state });
+    this.emit('stateChanged', { oldState, newState: state });
   }
 
   protected emitAudio(frame: AudioFrame): void {
@@ -113,7 +104,7 @@ export abstract class BaseProvider
       try {
         callback(frame);
       } catch (error) {
-        this.logCallbackError("Audio callback error", error);
+        this.logCallbackError('Audio callback error', error);
       }
     }
   }
@@ -121,7 +112,7 @@ export abstract class BaseProvider
   protected emitEvent(event: ProviderEvent): void {
     this.notifyEventListeners(event.type, event);
 
-    if (event.type === "provider") {
+    if (event.type === 'provider') {
       this.notifyEventListeners(event.subType, event);
     }
   }
@@ -136,7 +127,7 @@ export abstract class BaseProvider
       try {
         listener(event);
       } catch (error) {
-        this.logCallbackError("Event listener error", error);
+        this.logCallbackError('Event listener error', error);
       }
     }
   }
@@ -156,8 +147,9 @@ export abstract class BaseProvider
   }
 
   protected logCallbackError(prefix: string, error: unknown): void {
-    const detail =
-      error instanceof Error ? (error.stack ?? error.message) : String(error);
+    const detail = error instanceof Error
+      ? (error.stack ?? error.message)
+      : String(error);
     process.stderr.write(`[provider] ${prefix}: ${detail}\n`);
   }
 }

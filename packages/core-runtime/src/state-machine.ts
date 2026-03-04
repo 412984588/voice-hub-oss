@@ -4,19 +4,15 @@
  * 会话状态机
  */
 
-import { EventEmitter } from "eventemitter3";
-import { SessionState } from "@voice-hub/shared-types";
-import type { IStateMachine, RuntimeEvent } from "./types.js";
+import { EventEmitter } from 'eventemitter3';
+import { SessionState } from '@voice-hub/shared-types';
+import type { IStateMachine, RuntimeEvent } from './types.js';
 
 /** 状态转换表 */
 const STATE_TRANSITIONS: Partial<Record<SessionState, SessionState[]>> = {
   [SessionState.IDLE]: [SessionState.LISTENING, SessionState.PROCESSING],
   [SessionState.LISTENING]: [SessionState.PROCESSING, SessionState.IDLE],
-  [SessionState.PROCESSING]: [
-    SessionState.LISTENING,
-    SessionState.RESPONDING,
-    SessionState.IDLE,
-  ],
+  [SessionState.PROCESSING]: [SessionState.LISTENING, SessionState.RESPONDING, SessionState.IDLE],
   [SessionState.RESPONDING]: [SessionState.LISTENING, SessionState.IDLE],
   [SessionState.CONNECTING]: [SessionState.CONNECTED],
   [SessionState.CONNECTED]: [SessionState.IDLE, SessionState.LISTENING],
@@ -42,8 +38,8 @@ export class StateMachine extends EventEmitter implements IStateMachine {
   /** 转换到新状态 */
   async transitionTo(newState: SessionState): Promise<boolean> {
     if (!this.canTransitionTo(newState)) {
-      this.emit("error", {
-        type: "error",
+      this.emit('error', {
+        type: 'error',
         sessionId: this.sessionId,
         timestamp: Date.now(),
         data: {
@@ -56,8 +52,8 @@ export class StateMachine extends EventEmitter implements IStateMachine {
     const oldState = this._currentState;
     this._currentState = newState;
 
-    this.emit("state_changed", {
-      type: "state_changed",
+    this.emit('state_changed', {
+      type: 'state_changed',
       sessionId: this.sessionId,
       timestamp: Date.now(),
       data: { oldState, newState },
@@ -81,8 +77,8 @@ export class StateMachine extends EventEmitter implements IStateMachine {
     const oldState = this._currentState;
     this._currentState = SessionState.IDLE;
 
-    this.emit("state_changed", {
-      type: "state_changed",
+    this.emit('state_changed', {
+      type: 'state_changed',
       sessionId: this.sessionId,
       timestamp: Date.now(),
       data: { oldState, newState: SessionState.IDLE },

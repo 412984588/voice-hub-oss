@@ -4,10 +4,10 @@
  * 音频接收泵 - 从 Discord 接收音频数据
  */
 
-import type { AudioFrame, AudioStats } from "@voice-hub/shared-types";
-import type { AudioEngineConfig, AudioReceiverCallbacks } from "./types.js";
-import { AudioReceiverState } from "./types.js";
-import { JitterBuffer } from "./jitter-buffer.js";
+import type { AudioFrame, AudioStats } from '@voice-hub/shared-types';
+import type { AudioEngineConfig, AudioReceiverCallbacks } from './types.js';
+import { AudioReceiverState } from './types.js';
+import { JitterBuffer } from './jitter-buffer.js';
 
 /** 音频接收泵 */
 export class AudioIngressPump {
@@ -89,7 +89,7 @@ export class AudioIngressPump {
     this.state = AudioReceiverState.RECEIVING;
 
     if (frame.byteLength % 2 !== 0) {
-      this.callbacks.onError(new Error("Invalid PCM16 packet length"));
+      this.callbacks.onError(new Error('Invalid PCM16 packet length'));
       return;
     }
 
