@@ -44,6 +44,11 @@ DOUBAO_REALTIME_WS_URL=wss://...
 DOUBAO_APP_ID=your_app_id
 DOUBAO_ACCESS_TOKEN=your_access_token
 
+# 如果使用 Qwen DashScope 实时语音
+QWEN_REALTIME_WS_URL=wss://dashscope-intl.aliyuncs.com/api-ws/v1/realtime
+QWEN_API_KEY=your_qwen_api_key
+QWEN_MODEL=qwen3-omni-flash-realtime
+
 # Webhook 安全（建议）
 WEBHOOK_SECRET=replace_with_a_random_secret
 WEBHOOK_LEGACY_SECRET_HEADER=false

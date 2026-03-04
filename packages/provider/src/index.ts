@@ -9,4 +9,5 @@ export * from './types.js';
 export * from './base-provider.js';
 export * from './doubao-provider.js';
 export * from './local-mock-provider.js';
+export * from './qwen-dashscope-provider.js';
 export * from './factory.js';

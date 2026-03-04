@@ -21,6 +21,13 @@ export interface Config {
   doubaoAppId?: string;
   doubaoAccessToken?: string;
 
+  // Qwen DashScope
+  qwenRealtimeWsUrl?: string;
+  qwenApiKey?: string;
+  qwenModel?: string;
+  qwenVoice?: string;
+  qwenRegion?: 'intl' | 'cn';
+
   // Backend
   backendDispatchUrl?: string;
   backendTimeoutMs: number;
@@ -58,7 +65,7 @@ export interface Config {
   sessionReconnectDelayMs: number;
 
   // Provider
-  voiceProvider: 'disabled' | 'local-mock' | 'doubao';
+  voiceProvider: 'disabled' | 'local-mock' | 'doubao' | 'qwen-dashscope';
 }
 
 export { configSchema, CONSTANTS };
@@ -122,6 +129,15 @@ export function validateConfigForProvider(config: Config): {
     }
     if (!config.doubaoAccessToken) {
       errors.push('DOUBAO_ACCESS_TOKEN 在使用 doubao provider 时是必需的');
+    }
+  }
+
+  if (config.voiceProvider === 'qwen-dashscope') {
+    if (!config.qwenRealtimeWsUrl) {
+      errors.push('QWEN_REALTIME_WS_URL 在使用 qwen-dashscope provider 时是必需的');
+    }
+    if (!config.qwenApiKey) {
+      errors.push('QWEN_API_KEY 在使用 qwen-dashscope provider 时是必需的');
     }
   }
 

@@ -39,6 +39,7 @@ clawdh/
 
 - **IAudioProvider**: 提供商接口
 - **DoubaoProvider**: 豆包实时语音实现
+- **QwenDashscopeProvider**: Qwen DashScope 实时语音实现
 - **LocalMockProvider**: 本地 Mock（测试用）
 - **createProvider()**: 提供商工厂函数
 
@@ -129,12 +130,17 @@ DISCORD_GUILD_ID=
 DISCORD_VOICE_CHANNEL_ID=
 
 # 语音提供商
-VOICE_PROVIDER=disabled|local-mock|doubao
+VOICE_PROVIDER=disabled|local-mock|doubao|qwen-dashscope
 
 # 豆包配置
 DOUBAO_REALTIME_WS_URL=
 DOUBAO_APP_ID=
 DOUBAO_ACCESS_TOKEN=
+
+# Qwen DashScope 配置
+QWEN_REALTIME_WS_URL=
+QWEN_API_KEY=
+QWEN_MODEL=qwen3-omni-flash-realtime
 
 # 记忆存储
 MEMORY_DB_PATH=./data/memory_bank.db

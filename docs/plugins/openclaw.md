@@ -123,7 +123,7 @@ console.log(status.isActive);   // true/false
 
 | 变量 | 说明 | 默认值 | 必需 |
 |------|------|--------|------|
-| `VOICE_PROVIDER` | 语音提供商 | `local-mock` | 否 |
+| `VOICE_PROVIDER` | 语音提供商（disabled/local-mock/doubao/qwen-dashscope） | `local-mock` | 否 |
 | `DISCORD_BOT_TOKEN` | Discord 机器人令牌 | - | 是 |
 | `DISCORD_GUILD_ID` | Discord 服务器 ID | - | 是 |
 | `WEBHOOK_PORT` | Webhook 端口 | `8848` | 否 |

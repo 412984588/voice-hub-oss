@@ -57,6 +57,16 @@ export const configSchema = z.object({
   DOUBAO_APP_ID: z.string().min(1).optional(),
   DOUBAO_ACCESS_TOKEN: z.string().min(1).optional(),
 
+  // Qwen Realtime Voice (DashScope)
+  QWEN_REALTIME_WS_URL: z
+    .string()
+    .url()
+    .default('wss://dashscope-intl.aliyuncs.com/api-ws/v1/realtime'),
+  QWEN_API_KEY: z.string().min(1).optional(),
+  QWEN_MODEL: z.string().min(1).default('qwen3-omni-flash-realtime'),
+  QWEN_VOICE: z.string().min(1).optional(),
+  QWEN_REGION: z.enum(['intl', 'cn']).default('intl'),
+
   // Backend Dispatcher
   BACKEND_DISPATCH_URL: z.string().url().optional(),
   BACKEND_TIMEOUT_MS: z.coerce.number().int().positive().default(30000),
@@ -94,7 +104,9 @@ export const configSchema = z.object({
   SESSION_RECONNECT_DELAY_MS: z.coerce.number().int().positive().default(2000),
 
   // Provider Selection
-  VOICE_PROVIDER: z.enum(['disabled', 'local-mock', 'doubao']).default('disabled'),
+  VOICE_PROVIDER: z
+    .enum(['disabled', 'local-mock', 'doubao', 'qwen-dashscope'])
+    .default('disabled'),
 });
 
 /**
@@ -109,6 +121,12 @@ export const internalConfigSchema = configSchema.transform((raw) => ({
   doubaoRealtimeWsUrl: raw.DOUBAO_REALTIME_WS_URL,
   doubaoAppId: raw.DOUBAO_APP_ID,
   doubaoAccessToken: raw.DOUBAO_ACCESS_TOKEN,
+
+  qwenRealtimeWsUrl: raw.QWEN_REALTIME_WS_URL,
+  qwenApiKey: raw.QWEN_API_KEY,
+  qwenModel: raw.QWEN_MODEL,
+  qwenVoice: raw.QWEN_VOICE,
+  qwenRegion: raw.QWEN_REGION,
 
   backendDispatchUrl: raw.BACKEND_DISPATCH_URL,
   backendTimeoutMs: raw.BACKEND_TIMEOUT_MS,

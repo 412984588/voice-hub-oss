@@ -57,10 +57,14 @@ export const MANIFEST = {
       'DISCORD_BOT_TOKEN',
       'DISCORD_GUILD_ID',
       'DISCORD_VOICE_CHANNEL_ID',
-      'VOICE_PROVIDER', // 'disabled' | 'local-mock' | 'doubao'
+      'VOICE_PROVIDER', // 'disabled' | 'local-mock' | 'doubao' | 'qwen-dashscope'
       'DOUBAO_REALTIME_WS_URL',
       'DOUBAO_APP_ID',
       'DOUBAO_ACCESS_TOKEN',
+      'QWEN_REALTIME_WS_URL',
+      'QWEN_API_KEY',
+      'QWEN_MODEL',
+      'QWEN_VOICE',
       'MEMORY_DB_PATH',
       'WEBHOOK_PORT',
       'WEBHOOK_SECRET',
@@ -114,6 +118,7 @@ export const CLAUDE_CODE_PLUGIN = {
         { value: 'disabled', label: 'Disabled' },
         { value: 'local-mock', label: 'Local Mock (Testing)' },
         { value: 'doubao', label: 'Doubao Realtime' },
+        { value: 'qwen-dashscope', label: 'Qwen DashScope Realtime' },
       ],
       default: 'local-mock',
     },
@@ -192,13 +197,19 @@ DISCORD_BOT_TOKEN=your_bot_token_here
 DISCORD_GUILD_ID=your_guild_id
 DISCORD_VOICE_CHANNEL_ID=your_voice_channel_id
 
-# Voice Provider (disabled, local-mock, or doubao)
+# Voice Provider (disabled, local-mock, doubao, or qwen-dashscope)
 VOICE_PROVIDER=local-mock
 
 # Doubao Configuration (if using doubao)
 DOUBAO_REALTIME_WS_URL=wss://...
 DOUBAO_APP_ID=your_app_id
 DOUBAO_ACCESS_TOKEN=your_access_token
+
+# Qwen DashScope Configuration (if using qwen-dashscope)
+QWEN_REALTIME_WS_URL=wss://dashscope-intl.aliyuncs.com/api-ws/v1/realtime
+QWEN_API_KEY=your_qwen_api_key
+QWEN_MODEL=qwen3-omni-flash-realtime
+QWEN_VOICE=Chelsie
 
 # Memory Storage
 MEMORY_DB_PATH=./data/voice-hub.db
@@ -232,4 +243,3 @@ await hub.destroySession(sessionId);
 
 /** 导出所有内容 */
 export { MANIFEST as default };
-
