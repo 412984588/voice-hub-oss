@@ -12,6 +12,8 @@ export enum ProviderType {
   LOCAL_MOCK = 'local-mock',
   /** 火山引擎豆包 */
   DOUBAO = 'doubao',
+  /** 阿里云百炼 Qwen Realtime */
+  QWEN_DASHSCOPE = 'qwen-dashscope',
 }
 
 /**

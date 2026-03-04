@@ -99,6 +99,7 @@ describe('@voice-hub/claude-marketplace', () => {
       expect(providerSetting).toBeDefined();
       expect(providerSetting?.type).toBe('select');
       expect(providerSetting?.default).toBe('local-mock');
+      expect(providerSetting?.options.some((o: any) => o.value === 'qwen-dashscope')).toBe(true);
     });
 
     it('should have notifications defined', () => {
