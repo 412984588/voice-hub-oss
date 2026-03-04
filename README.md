@@ -119,7 +119,7 @@ Voice Hub 提供两个插件，分别用于 OpenClaw 和 Claude Code 集成：
 - ❌ 仓库中不包含任何真实 API 密钥
 - ✅ 用户自行配置所需密钥
 - ✅ 支持 `.env` 文件配置
-- ✅ 支持 provider 切换（disabled, local-mock, doubao）
+- ✅ 支持 provider 切换（disabled, local-mock, doubao, qwen-dashscope）
 
 ## 许可证
 

@@ -40,13 +40,18 @@ DISCORD_BOT_TOKEN=your_bot_token_here
 DISCORD_GUILD_ID=your_guild_id
 DISCORD_VOICE_CHANNEL_ID=your_voice_channel_id
 
-# 语音提供商（disabled, local-mock, doubao）
+# 语音提供商（disabled, local-mock, doubao, qwen-dashscope）
 VOICE_PROVIDER=local-mock
 
 # Doubao 配置（如果使用 doubao）
 DOUBAO_REALTIME_WS_URL=wss://...
 DOUBAO_APP_ID=your_app_id
 DOUBAO_ACCESS_TOKEN=your_access_token
+
+# Qwen DashScope 配置（如果使用 qwen-dashscope）
+QWEN_REALTIME_WS_URL=wss://dashscope-intl.aliyuncs.com/api-ws/v1/realtime
+QWEN_API_KEY=your_qwen_api_key
+QWEN_MODEL=qwen3-omni-flash-realtime
 
 # Webhook 配置
 WEBHOOK_PORT=8848
@@ -220,6 +225,9 @@ await hub.destroySession(sessionId);
 | `DOUBAO_REALTIME_WS_URL` | 豆包 WebSocket URL | - | 否 |
 | `DOUBAO_APP_ID` | 豆包应用 ID | - | 否 |
 | `DOUBAO_ACCESS_TOKEN` | 豆包访问令牌 | - | 否 |
+| `QWEN_REALTIME_WS_URL` | Qwen DashScope WebSocket URL | - | 否 |
+| `QWEN_API_KEY` | Qwen DashScope API Key | - | 否 |
+| `QWEN_MODEL` | Qwen Realtime 模型 | `qwen3-omni-flash-realtime` | 否 |
 | `MEMORY_DB_PATH` | SQLite 数据库路径 | `./data/voice-hub.db` | 否 |
 | `WEBHOOK_PORT` | Webhook 端口 | `8848` | 否 |
 | `WEBHOOK_SECRET` | Webhook 签名密钥 | - | 是 |
